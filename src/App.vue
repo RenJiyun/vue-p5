@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <CircularInversion></CircularInversion>
+    <AnimationTest></AnimationTest>
   </div>
 </template>
 
 <script>
-import CircularInversion from './components/p5/CircularInversion'
+import AnimationTest from './components/p5/AnimationTest'
 
 export default {
   name: "App",
   components: {
-    CircularInversion
+    AnimationTest
   },
 };
 </script>

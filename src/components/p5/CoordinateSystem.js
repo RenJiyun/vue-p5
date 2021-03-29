@@ -1,3 +1,4 @@
+
 const $math = require("mathjs");
 
 function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, labelInterval }) {
@@ -17,6 +18,44 @@ function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, l
 
     this.outOfRange = (p) => {
         return p.x > this.xMax || p.x < this.xMin || p.y > this.yMax || p.y < this.yMin;
+    }
+
+
+    this.toOuterCoord = (p) => {
+        return {
+            x: this.ox + p.x,
+            y: this.oy - p.y
+        }
+    }
+
+
+    // 圆
+    this.circle = (p5, x0, y0, r) => {
+        let x = (this.ox + x0) * this.xInterval;
+        let y = (this.oy - y0) * this.yInterval;
+        p5.circle(x, y, 2 * r * xInterval);
+    }
+
+    // 圆周运动
+    this.circularMotion = (p5, x0, y0, r) => {
+        let ret = [];
+        p5.noFill();
+        p5.stroke(255);
+        p5.beginShape();
+        let delta = 0.1;
+        let max = Math.ceil($math.pi * 2 / delta) + 5;
+        let iterNum = p5.frameCount % max;
+        for (let i = 0; i < iterNum; i++) {
+            let x = x0 + $math.cos(i * delta) * r;
+            let y = y0 + $math.sin(i * delta) * r;
+            let p = this.toOuterCoord({ x: x, y: y });
+            ret.push({
+                x: x, y: y
+            })
+            p5.vertex(p.x, p.y);
+        }
+        p5.endShape();
+        return ret;
     }
 
     // 函数图像
@@ -43,7 +82,10 @@ function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, l
         }
     }
 
-    this.showComplexes = (p5, complexes, arrow = true) => {
+
+    // 显示复数
+    this.showComplexes = (p5, complexes, arrow = true, label = false) => {
+        let arrowLen = Math.min(this.width, this.height) / 80;
 
         for (let c of complexes) {
             p5.stroke(255);
@@ -51,8 +93,8 @@ function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, l
             if (arrow) {
                 p5.line(this.ox, this.oy, this.ox + c.re * this.xInterval, this.oy - c.im * this.yInterval);
 
-                let rc1 = $math.complex({ r: 1, phi: $math.pi * 4 / 5 }).mul($math.complex({ r: 0.2, phi: c.arg() })).add(c);
-                let rc2 = $math.complex({ r: 1, phi: -$math.pi * 4 / 5 }).mul($math.complex({ r: 0.2, phi: c.arg() })).add(c);
+                let rc1 = $math.complex({ r: 1, phi: $math.pi * 4 / 5 }).mul($math.complex({ r: arrowLen, phi: c.arg() })).add(c);
+                let rc2 = $math.complex({ r: 1, phi: -$math.pi * 4 / 5 }).mul($math.complex({ r: arrowLen, phi: c.arg() })).add(c);
                 p5.beginShape();
                 p5.vertex(this.ox + rc1.re * this.xInterval, this.oy - rc1.im * this.yInterval);
                 p5.vertex(this.ox + c.re * this.xInterval, this.oy - c.im * this.yInterval);
@@ -63,11 +105,26 @@ function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, l
             }
 
             // 显示标签
-            p5.noStroke();
-            p5.text(c.format(2),
-                this.ox + c.re * this.xInterval,
-                this.oy - c.im * this.yInterval);
+            if (label) {
+                p5.noStroke();
+                p5.text(c.format(2),
+                    this.ox + c.re * this.xInterval,
+                    this.oy - c.im * this.yInterval);
+            }
+
         }
+    }
+
+    
+    this.shape = (p5, vertexes) => {
+        p5.noFill();
+        p5.stroke(255);
+        p5.beginShape()
+        for (let v of vertexes) {
+            let p = this.toOuterCoord({x: v.re, y: v.im})
+            p5.vertex(p.x, p.y);
+        }
+        p5.endShape();
     }
 
 
