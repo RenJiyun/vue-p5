@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <ExploreComplex></ExploreComplex>
+    <CircularInversion></CircularInversion>
   </div>
 </template>
 
 <script>
-import ExploreComplex from './components/p5/ExploreComplex'
+import CircularInversion from './components/p5/CircularInversion'
 
 export default {
   name: "App",
   components: {
-    ExploreComplex
+    CircularInversion
   },
 };
 </script>

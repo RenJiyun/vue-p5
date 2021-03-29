@@ -3,7 +3,8 @@
 </template>
 
 <script>
-// 复数基本性质的可视化
+// 圆的反演
+
 import P5 from "p5";
 // const $math = require("mathjs");
 import { CoordinateSystem } from "./CoordinateSystem";
@@ -39,16 +40,8 @@ export default {
       });
       coord.show(p5);
 
-      coord.showFunctions(p5, [(x) => x * x + 2 * x - 10]);
 
-      // let c1 = $math.complex("2 + 3i");
-      // let c2 = $math.complex(
-      //   (p5.mouseX - p5.width / 2) / 50,
-      //   -(p5.mouseY - p5.height / 2) / 50
-      // );
 
-      // let c3 = c1.add(c2);
-      // coord.showComplexes(p5, [c1, c2, c3]);
     },
   },
 };
