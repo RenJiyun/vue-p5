@@ -1,19 +1,24 @@
 <template>
   <div id="app">
-    <P5Test></P5Test>
+    <ExploreComplex></ExploreComplex>
   </div>
 </template>
 
 <script>
-import P5Test from "./components/p5/P5Test.vue";
+import ExploreComplex from './components/p5/ExploreComplex'
 
 export default {
   name: "App",
   components: {
-    P5Test,
+    ExploreComplex
   },
 };
 </script>
 
 <style>
+#app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>
