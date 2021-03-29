@@ -4,9 +4,9 @@
 
 <script>
 import P5 from "p5";
-import { CoordinateSystem } from "./CoordinateSystem";
-import { Create, Chain } from "./Animation";
-import { Circle } from "./Mobj";
+import { CoordinateSystem } from "@/lib/CoordinateSystem";
+import { Create, Chain } from "@/lib/Animation";
+import { Circle } from "@/lib/Mobj";
 export default {
   mounted() {
     const script = (p5) => {

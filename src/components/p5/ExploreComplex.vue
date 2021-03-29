@@ -6,7 +6,7 @@
 // 复数基本性质的可视化
 import P5 from "p5";
 // const $math = require("mathjs");
-import { CoordinateSystem } from "./CoordinateSystem";
+import { CoordinateSystem } from "@/lib/CoordinateSystem";
 
 export default {
   mounted() {
