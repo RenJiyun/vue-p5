@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <AnimationTest></AnimationTest>
+    <Scene></Scene>
   </div>
 </template>
 
 <script>
-import AnimationTest from './components/p5/AnimationTest'
+import Scene from './components/trigonometry/Scene'
 
 export default {
   name: "App",
   components: {
-    AnimationTest
+    Scene
   },
 };
 </script>

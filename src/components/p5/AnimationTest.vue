@@ -39,19 +39,14 @@ export default {
         labelInterval: 2,
       };
       let coord = new CoordinateSystem(coordConfig);
-      this.animationInstance1 = new Create(coord, 500);
-
       let circle = new Circle(0, 0, 300);
-      this.animationInstance2 = new Create(circle, 600);
-
-
-      this.animationInstance3 = new Chain([this.animationInstance1, this.animationInstance2])
+      this.animations = new Chain([new Create(coord, 500), new Create(circle, 600)])
     },
 
     draw(p5) {
       p5.background(0);
       p5.translate(p5.width / 2, p5.height / 2);
-      this.animationInstance3.display(p5);
+      this.animations.display(p5);
     },
   },
 };

@@ -16,6 +16,38 @@ function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, l
     this.labelInterval = labelInterval == undefined ? 1 : labelInterval;
 
 
+
+    this.showMobj = (canvas, mobj) => {
+        canvas.noFill();
+        canvas.stroke(255);
+        let env = {
+            xMin: this.xMin,
+            xMax: this.xMax,
+            deltaTime: canvas.deltaTime
+        }
+
+        let points = mobj.points(env);
+        let shapePoints = points.filter(p => p.shape)
+        let nonShapePoints = points.filter(p => !p.shape)
+
+        canvas.beginShape();
+        for (let p of shapePoints) {
+            let outerP = this.toOuterCoord(p);
+            canvas.vertex(outerP.x, outerP.y)
+        }
+        canvas.endShape();
+
+        canvas.fill(255, 0, 0);
+        canvas.noStroke();
+        for (let p of nonShapePoints) {
+            let outerP = this.toOuterCoord(p);
+            canvas.circle(outerP.x, outerP.y, 5);
+        }
+
+
+    }
+
+
     this.outOfRange = (p) => {
         return p.x > this.xMax || p.x < this.xMin || p.y > this.yMax || p.y < this.yMin;
     }
@@ -23,8 +55,8 @@ function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, l
 
     this.toOuterCoord = (p) => {
         return {
-            x: this.ox + p.x,
-            y: this.oy - p.y
+            x: this.ox + p.x * this.xInterval,
+            y: this.oy - p.y * this.yInterval
         }
     }
 
@@ -115,13 +147,13 @@ function CoordinateSystem({ ox, oy, width, height, xInterval, yInterval, grid, l
         }
     }
 
-    
+
     this.shape = (p5, vertexes) => {
         p5.noFill();
         p5.stroke(255);
         p5.beginShape()
         for (let v of vertexes) {
-            let p = this.toOuterCoord({x: v.re, y: v.im})
+            let p = this.toOuterCoord({ x: v.re, y: v.im })
             p5.vertex(p.x, p.y);
         }
         p5.endShape();
