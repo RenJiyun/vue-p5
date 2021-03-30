@@ -13,6 +13,7 @@ import { Create, Chain } from "@/lib/Animation";
 import { RollingCircle } from "@/lib/RollingCircle";
 
 export default {
+  name: 'Scene',
   mounted() {
     const script = (p5) => {
       (p5.setup = () => {
