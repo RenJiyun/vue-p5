@@ -24,6 +24,12 @@ const routes = [
     path: '/trigonometry',
     name: 'trigonometry',
     component: Trigonometry
+  },
+
+  {
+    path: '/inversion',
+    name: 'inversion',
+    component: () => import('../views/Inversion')
   }
 ]
 
