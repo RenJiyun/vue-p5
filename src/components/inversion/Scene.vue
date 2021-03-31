@@ -3,11 +3,12 @@
 </template>
 
 <script>
+const $math = require("mathjs");
 import P5 from "p5";
 import { CoordinateSystem } from "@/lib/CoordinateSystem";
+import { Line } from "@/lib/Mobj";
 
 export default {
-  name: "Scene",
   mounted() {
     const script = (p5) => {
       (p5.setup = () => {
@@ -41,12 +42,14 @@ export default {
         labelInterval: 2,
       };
       this.coord = new CoordinateSystem(coordConfig);
+      this.line = new Line(0, 1, $math.pi / 4);
     },
 
     draw(p5) {
       p5.background(0);
       p5.translate(p5.width / 2, p5.height / 2);
       this.coord.show();
+      this.coord.showMobj(p5, this.line);
     },
   },
 };

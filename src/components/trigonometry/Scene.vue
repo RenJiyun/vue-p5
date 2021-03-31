@@ -13,7 +13,6 @@ import { Create, Chain } from "@/lib/Animation";
 import { RollingCircle } from "@/lib/RollingCircle";
 
 export default {
-  name: 'Scene',
   mounted() {
     const script = (p5) => {
       (p5.setup = () => {
@@ -79,11 +78,11 @@ export default {
       });
 
       this.animationChain = new Chain([
-        // new Create(this.coord, 500),
-        // new Create(this.circle, 500),
-        // new Create(this.f, 500),
-        // new Create(this.triangle, 500),
-        // new Create(this.rollingCircle1, 100),
+        new Create(this.coord, 500),
+        new Create(this.circle, 500),
+        new Create(this.f, 500),
+        new Create(this.triangle, 500),
+        new Create(this.rollingCircle1, 500),
         new Create(this.rollingCircle2, 5000),
       ]);
     },
@@ -91,9 +90,9 @@ export default {
     draw(p5) {
       p5.background(0);
       p5.translate(p5.width / 2, p5.height / 2);
-      this.coord.show();
-      // this.animationChain.display(p5, this.coord)
-      this.coord.showMobj(p5, this.rollingCircle3);
+      // this.coord.show();
+      this.animationChain.display(p5, this.coord)
+      // this.coord.showMobj(p5, this.rollingCircle3);
     },
 
     keyPressed(p5) {

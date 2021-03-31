@@ -93,7 +93,10 @@ class CoordinateSystem {
         let env = {
             xMin: this.xMin,
             xMax: this.xMax,
-            deltaTime: canvas.deltaTime
+            yMin: this.yMin,
+            yMax: this.yMax,
+            deltaTime: canvas.deltaTime,
+            outOfRange: this.outOfRange
         }
 
         let points = mobj.points(env);

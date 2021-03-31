@@ -35,6 +35,39 @@ class Line {
         this.x0 = x0;
         this.y0 = y0;
         this.theta = theta;
+        this.c0 = $math.complex(this.x0, this.y0);
+    }
+
+    get points() {
+        return (env) => {
+            let ret = []
+            let delta = 0.5;
+            for (let r = 0; ; r += delta) {
+                let dc = $math.complex({ r: r, phi: this.theta });
+                let c1 = this.c0.add(dc)
+                let c2 = this.c0.add(dc.neg());
+                // if (env.outOfRange({x: c1.re, y: c1.im}) && env.outOfRange({x: c2.re, y: c2.im})) {
+                //     break;
+                // }
+
+                console.log(env)
+                if (ret.length > 3) {
+                    break;
+                }
+                ret.push({
+                    x: c1.re,
+                    y: c1.im,
+                    shape: true
+                })
+                ret.unshift({
+                    x: c2.re,
+                    y: c2.im,
+                    shape: true
+                })
+            }
+
+            return ret;
+        }
     }
 }
 
