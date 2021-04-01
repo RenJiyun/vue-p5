@@ -1,71 +1,82 @@
-import { CoordinateSystem } from "./CoordinateSystem";
+/**
+ * 动画效果分成两种：创建和其他
+ * 创建效果需要对象自己完成
+ */
+class Animation {
+    constructor(obj, duration = 300) {
+        this._obj = obj;
 
-// 创建动画
-function Create(mobj, duration = 500) {
-    this.mobj = mobj;
-    this.done = false;
-    this.duration = duration;
-    this.current = 0;
+        // 动画总时长
+        this.duration = duration;
+        this.current = 0;
+        this._done = false;
+    }
 
-    this.display = (canvas, coord) => {
+    get done() {
+        return this._done;
+    }
 
-        // TODO 坐标系自身需要特殊处理，目前坐标系和Mobj的概念不统一
-        if (this.mobj instanceof CoordinateSystem) {
-            coord = undefined
+}
+
+
+class Create extends Animation {
+    constructor(...args) {
+        super(...args);
+    }
+
+    show(canvas) {
+        let ret = []
+        if (!this._done) {
+            this.current += Math.ceil(canvas.deltaTime);
+            this.current = Math.min(this.current, this.duration);
+            // 此外可以对current施加别的函数，例如贝塞尔函数
+            let progress = this.current / this.duration;
+            this.obj.create(canvas, progress);
+
+            // TODO 这些地方可能会出现精度的问题
+            if (progress >= 1) {
+                this._done = true;
+                ret.push(this.obj);
+            }
         }
-        this.current += Math.ceil(canvas.deltaTime)
-        if (!this.done) {
-            let pg = canvas.createGraphics(canvas.width, canvas.height);
-            pg.translate(pg.width / 2, pg.height / 2);
-            pg.background(0, 0);
-
-            if (coord != undefined) {
-                coord.showMobj(pg, this.mobj);
-            } else {
-                this.mobj.show(pg)
-            }
-
-            canvas.scale(canvas.map(this.current, 1, this.duration, 0, 1))
-            canvas.image(pg, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-            if (this.current >= this.duration) {
-                this.done = true;
-            }
-        } else {
-            canvas.scale(1);
-            if (coord != undefined) {
-                coord.showMobj(canvas, this.mobj);
-            } else {
-                this.mobj.show(canvas)
-            }
-        }
+        return ret;
     }
 }
 
-function FadeIn() {
+class FadeIn extends Animation {
 
 }
 
-function FadeOut() {
+class FadeOut extends Animation {
 
 }
 
 
-// 串联动画
-function Chain(animations = []) {
-    this.animations = animations;
 
-    this.display = (canvas, coord) => {
+class Sequential extends Animation {
+    constructor(animations) {
+        super();
+        this.animations = animations;
+    }
+
+    show(canvas) {
         for (let animation of this.animations) {
-            if (animation.done) {
-                animation.display(canvas, coord)
-            } else {
-                animation.display(canvas, coord);
-                break;
+            if (!animation.done) {
+                let lastObj = animation.show(canvas);
+                return lastObj;
             }
         }
+        this._done = true;
+    }
+}
+
+class Parallel extends Animation {
+    constructor(animations) {
+        super();
+        this.animations = animations;
     }
 }
 
 export {
-    Create, Chain, FadeIn, FadeOut
+    Animation, Create, Sequential, FadeIn, FadeOut, Parallel
 }

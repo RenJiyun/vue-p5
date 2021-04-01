@@ -1,6 +1,6 @@
 const $math = require("mathjs");
 
-class CoordinateSystem {
+class Coord {
     constructor(config) {
         let { defaultCanvas, ox, oy, width, height, xInterval, yInterval, grid, labelInterval } = config;
         this.defaultCanvas = defaultCanvas;
@@ -17,6 +17,20 @@ class CoordinateSystem {
         this.yMin = -this.yMax
         this._labelInterval = labelInterval == undefined ? 1 : labelInterval;
         this._scale = 1;
+
+
+        this._done = false;
+
+        this.mobjs = [];
+    }
+
+    add(mobj) {
+        this.mobjs.push(mobj);
+    }
+
+
+    get done() {
+        return this._done;
     }
 
 
@@ -133,6 +147,13 @@ class CoordinateSystem {
         }
     }
 
+    toSceneCoord(c) {
+        return {
+            x: this.ox + c.re * this.xInterval,
+            y: this.oy - c.im * this.yInterval
+        }
+    }
+
 
     // 显示复数
     showComplexes(canvas = this.defaultCanvas, complexes, arrow = true, label = false) {
@@ -166,7 +187,7 @@ class CoordinateSystem {
         }
     }
 
-    show(canvas = this.defaultCanvas) {
+    show(canvas) {
         canvas.stroke(255);
         canvas.fill(255);
 
@@ -207,10 +228,10 @@ class CoordinateSystem {
             }
 
         }
-
+        this._done = true;
     }
 }
 
 export {
-    CoordinateSystem
+    Coord
 }
