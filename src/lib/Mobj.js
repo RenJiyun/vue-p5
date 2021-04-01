@@ -8,6 +8,7 @@ class Mobj {
         this.coord = coord;
         this.coord.add(this);
         this._done = false;
+
     }
 
     coordChanged() {
@@ -17,6 +18,7 @@ class Mobj {
     get done() {
         return this._done;
     }
+
 }
 
 
@@ -150,5 +152,5 @@ class Polygon {
 }
 
 export {
-    Circle, Line, Function, Triangle, Polygon
+    Mobj, Circle, Line, Function, Triangle, Polygon
 }

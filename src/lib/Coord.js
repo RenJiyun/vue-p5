@@ -148,12 +148,12 @@ class Coord {
     }
 
     toSceneCoord(c) {
-        return {
-            x: this.ox + c.re * this.xInterval,
-            y: this.oy - c.im * this.yInterval
-        }
+        return [this.ox + c.re * this.xInterval, this.oy - c.im * this.yInterval];
     }
 
+    toSceneLength(l) {
+        return l * this.xInterval;
+    } 
 
     // 显示复数
     showComplexes(canvas = this.defaultCanvas, complexes, arrow = true, label = false) {

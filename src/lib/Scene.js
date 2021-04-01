@@ -12,35 +12,36 @@ class Scene {
         this.objects = [];
 
         // 每个对象均绘制在私有的图层上，场景由图层叠加形成
-        this.snapshots = [];
+        this.layers = [];
 
         this.done = false;
     }
 
     show() {
-        function updateSnapshots() {
+        function updateLayers() {
             for (let index = 0; index < this.objects.length; index++) {
                 let obj = this.objects[index];
-                let snapshot = this.snapshots[index];
+                let layer = this.layers[index];
                 if (!obj.done) {
-                    obj.show(snapshot);
+                    layer.clear();
+                    obj.show(layer, this.canvas.deltaTime);
                 } else if (obj instanceof Animation) {
                     this.objects[index] = obj.obj;
                 }
             }
         }
 
-        function showSnapshots() {
-            for (let snapshot of this.snapshots) {
-                this.canvas.image(snapshot, -this.width / 2, -this.height / 2, this.width, this.height);
+        function showLayers() {
+            for (let layer of this.layers) {
+                this.canvas.image(layer, -this.width / 2, -this.height / 2, this.width, this.height);
             }
         }
 
 
-        this.canvas.background(0);
+        this.canvas.background(30, 30, 30);
         this.canvas.translate(this.width / 2, this.height / 2)
-        updateSnapshots.call(this);
-        showSnapshots.call(this);
+        updateLayers.call(this);
+        showLayers.call(this);
         if (this.done) {
             this.canvas.noLoop();
         }
@@ -50,10 +51,10 @@ class Scene {
 
     add(obj) {
         this.objects.push(obj);
-        let pg = this.canvas.createGraphics(this.width, this.height);
-        pg.background(0, 0, 0, 0);
-        pg.translate(this.width / 2, this.height / 2);
-        this.snapshots.push(pg);
+        let layer = this.canvas.createGraphics(this.width, this.height);
+        layer.background(0, 0, 0, 0);
+        layer.translate(this.width / 2, this.height / 2);
+        this.layers.push(layer);
 
         return this;
     }

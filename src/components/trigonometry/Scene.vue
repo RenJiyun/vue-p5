@@ -6,9 +6,9 @@
 const $math = require("mathjs");
 import P5 from "p5";
 import { Coord } from "@/lib/Coord";
-import { Circle } from "@/lib/Mobj";
 import { Scene } from "@/lib/Scene";
-import { Create } from "@/lib/Animation";
+// import { TriangleAndCircle } from "@/series/trigonometry/c1/TriangleAndCircle";
+import { Polygon } from "@/series/trigonometry/c1/Polygon";
 
 export default {
   mounted() {
@@ -53,11 +53,31 @@ export default {
       };
 
       let coord = new Coord(coordConfig);
+      this.scene.add(coord);
 
-      this.scene
-        .add(coord)
-        .add(new Create(new Circle(coord, $math.complex(0, 0), 10), 2000))
-        .add(new Create(new Circle(coord, $math.complex(0, 0), 5), 2000));
+      let polygon = new Polygon(coord, [
+        $math.complex(1, 1),
+        $math.complex(10, 3),
+        $math.complex(4, 12)
+      ]) 
+
+      this.scene.add(polygon)
+
+      // let tc = new TriangleAndCircle(
+      //   coord,
+      //   4,
+      //   (progress) => {
+      //     return {
+      //       c: $math.complex({r: 6, phi: -$math.pi * 2 * progress}),
+      //       nc: $math.complex({r: 1, phi: -$math.pi * 2 * progress}),
+      //       l: progress * 2 * $math.pi * 6,
+      //     };
+      //   },
+      //   -$math.pi / 6,
+      //   $math.pi / 6,
+      //   $math.pi
+      // );
+      // this.scene.add(tc);
     },
 
     draw() {
