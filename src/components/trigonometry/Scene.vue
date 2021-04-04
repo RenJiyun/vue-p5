@@ -7,15 +7,10 @@ const $math = require("mathjs");
 import P5 from "p5";
 import { Coord } from "@/lib/Coord";
 import { Scene } from "@/lib/Scene";
-import {
-  VetorField,
-  Vector,
-  PerlinNosieField,
-  Partical,
-  Line,
-} from "@/series/trigonometry/c1/mobjs";
+// import { Partical, Line, Ellipse } from "@/series/trigonometry/c1/mobjs";
 
-import { Function } from "@/lib/Mobj";
+import { VetorField, Partical } from "@/lib/Mobj";
+// const $bazier = require("bezier-easing");
 
 export default {
   mounted() {
@@ -62,35 +57,36 @@ export default {
       let coord = new Coord(coordConfig);
       this.scene.add(coord);
 
-      this.scene.add(
-        new VetorField(coord, (c, t) => {
-          return c.mul(
-            $math.complex({ r: 1 / c.abs(), phi: $math.pi / 2 + t / 1000 })
-          );
-        })
+      let vf1 = new VetorField(
+        (c) => {
+          let noise = p5.noise(c.re, c.im);
+          return $math.complex({ r: 1, phi: 2 * $math.pi * noise });
+        },
+        {
+          coord: coord,
+        }
       );
 
-      this.scene.add(
-        new Vector(coord, $math.complex(0, 1), $math.complex(10, 2))
-      );
-      this.scene.pop();
-      this.scene.pop();
-      this.scene.add(new PerlinNosieField(coord));
-      this.scene.pop();
-
-      // this.scene.add(new Function(coord, (x) => $math.sin(x)));
-      // this.scene.pop();
-
-      this.scene.add(new Function(coord, (x) => $math.cos((x * x) / 50)));
-      this.scene.pop();
-
-      this.scene.add(
-        new Partical(coord, $math.complex(0, 0), $math.complex(3, 2))
+      let vf2 = new VetorField(
+        (c) => $math.complex({ r: 1, phi: $math.pi / 2 + c.arg() }),
+        {
+          coord: coord,
+        }
       );
 
-      this.scene.add(
-        new Line(coord, $math.complex(0, 8), $math.complex(22, 0))
-      );
+      let partical = new Partical($math.complex(0, 6), $math.complex(0, 0), {
+        coord: coord,
+      });
+
+      // let particals = [];
+      // for (let i = 0; i < 100; i++) {
+      //   let s = $math.complex()
+      //   new Partical($math.complex())
+      // }
+
+      // partical.addToVf(vf2.add(vf1))
+
+      this.scene.add(vf2.add(vf1)).add(partical);
     },
 
     draw() {
@@ -99,5 +95,7 @@ export default {
   },
 };
 
-// TODO 粒子在场中的运动；粒子的尾迹； 柏林噪声场中粒子的运动；椭圆的性质；手拉手模型
+// TODO 柏林噪声场中粒子的运动；椭圆的性质；手拉手模型
+// TODO 精度问题，比如椭圆中粒子的碰撞可能会出去
+// TODO 数学对象临时动画的加入
 </script>

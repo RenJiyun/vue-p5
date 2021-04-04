@@ -173,112 +173,36 @@ class QQCircle extends Mobj {
   }
 }
 
-class VetorField extends Mobj {
-  constructor(coord, f) {
-    super(coord);
 
-    this.f = f;
 
-    this.current = 0;
-  }
+// class PerlinNosieField extends Mobj {
+//   constructor(coord) {
+//     super(coord);
 
-  show(canvas, deltaTime) {
-    this.current += deltaTime;
-    canvas.noFill();
-    canvas.stroke(255);
-    let interval = 2;
-    for (let x = this.coord.xMin; x <= this.coord.xMax; x += interval) {
-      for (let y = this.coord.yMin; y <= this.coord.yMax; y += interval) {
-        let c = $math.complex(x, y);
-        let fc = this.f(c, this.current);
-        let ec = c.add(fc);
+//     this.current = 0;
+//   }
 
-        new Vector(this.coord, c, ec).show(canvas);
-      }
-    }
+//   show(canvas, deltaTime) {
+//     this.current += deltaTime;
+//     canvas.noFill();
+//     canvas.stroke(255);
 
-    this._done = true;
-  }
-}
+//     let interval = 2;
+//     for (let x = this.coord.xMin; x <= this.coord.xMax; x += interval) {
+//       for (let y = this.coord.yMin; y <= this.coord.yMax; y += interval) {
+//         let n = canvas.noise(x, y);
+//         let s = $math.complex(x, y);
+//         let e = s.add($math.complex({ r: n, phi: $math.pi * 2 * n }));
 
-class Vector extends Mobj {
-  constructor(coord, s, e) {
-    super(coord);
-    this.s = s;
-    this.e = e;
-  }
+//         new Vector(this.coord, s, e).show(canvas);
+//       }
+//     }
 
-  show(canvas) {
-    let s = this.s;
-    let e = this.e;
-    canvas.noFill();
-    canvas.stroke(255);
-    canvas.line(...this.coord.toSceneCoord(s), ...this.coord.toSceneCoord(e));
-    let se = e.sub(s);
-    let angle = ($math.pi / 6) * 5;
-    let lc = e.add(se.mul($math.complex({ r: 0.2 / se.abs(), phi: angle })));
-    let rc = e.add(se.mul($math.complex({ r: 0.2 / se.abs(), phi: -angle })));
-    canvas.fill(255);
-    canvas.noStroke();
-    canvas.beginShape();
-    canvas.vertex(...this.coord.toSceneCoord(e));
-    canvas.vertex(...this.coord.toSceneCoord(lc));
-    canvas.vertex(...this.coord.toSceneCoord(rc));
-    canvas.endShape(canvas.CLOSE);
-    this._done = true;
-  }
-}
+//     this._done = true;
+//   }
+// }
 
-class PerlinNosieField extends Mobj {
-  constructor(coord) {
-    super(coord);
 
-    this.current = 0;
-  }
-
-  show(canvas, deltaTime) {
-    this.current += deltaTime;
-    canvas.noFill();
-    canvas.stroke(255);
-
-    let interval = 2;
-    for (let x = this.coord.xMin; x <= this.coord.xMax; x += interval) {
-      for (let y = this.coord.yMin; y <= this.coord.yMax; y += interval) {
-        let n = canvas.noise(x, y);
-        let s = $math.complex(x, y);
-        let e = s.add($math.complex({ r: n, phi: $math.pi * 2 * n }));
-
-        new Vector(this.coord, s, e).show(canvas);
-      }
-    }
-
-    this._done = true;
-  }
-}
-
-class Partical extends Mobj {
-  constructor(coord, s, v) {
-    super(coord);
-    this.p = s;
-    this.v = v;
-    this.line = new Line(coord, $math.complex(0, 8), $math.complex(22, 0));
-  }
-
-  show(canvas, deltaTime) {
-    canvas.fill(255, 0, 0);
-    canvas.noStroke();
-    this.p = this.p.add($math.multiply(this.v, deltaTime / 1000));
-    let [collided, newV] = this.line.collide(this.p, this.v);
-    this.v = newV;
-    if (collided) {
-      this.current = 0;
-    }
-    canvas.circle(
-      ...this.coord.toSceneCoord(this.p),
-      this.coord.toSceneLength(0.5)
-    );
-  }
-}
 
 class Line extends Mobj {
   constructor(coord, c0, c1) {
@@ -334,14 +258,58 @@ class Line extends Mobj {
   }
 }
 
+class Ellipse extends Mobj {
+  constructor(coord, a, b) {
+    super(coord);
+    this.a = a;
+    this.b = b;
+  }
+
+  show(canvas) {
+    canvas.noFill();
+    canvas.stroke(255);
+    let delta = 0.1;
+    canvas.beginShape();
+    for (let theta = 0; theta <= $math.pi * 2 + delta; theta += delta) {
+      canvas.vertex(
+        ...this.coord.toSceneCoord(
+          this.a * $math.cos(theta),
+          this.b * $math.sin(theta)
+        )
+      );
+    }
+
+    canvas.endShape();
+
+    this._done = true;
+  }
+
+  collide(c, v) {
+    let x = c.re;
+    let y = c.im;
+    let a = this.a;
+    let b = this.b;
+    let pow = Math.pow;
+    let diff = pow(x, 2) / pow(a, 2) + pow(y, 2) / pow(b, 2) - 1;
+    if (diff >= 0.1 || diff <= -0.1) {
+      console.log(diff);
+      return [false, v];
+    }
+
+    let line = new Line(
+      this.coord,
+      $math.complex(pow(a, 2) / x, 0),
+      $math.complex(0, pow(b, 2) / y)
+    );
+    return line.collide(c, v);
+  }
+}
+
 export {
   Segment,
   Polygon,
   TriangleAndCircle,
   QQCircle,
-  VetorField,
-  Vector,
-  PerlinNosieField,
-  Partical,
   Line,
+  Ellipse,
 };

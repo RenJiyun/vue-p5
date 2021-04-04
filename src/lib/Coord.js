@@ -16,139 +16,19 @@ class Coord {
     this.defaultCanvas = defaultCanvas;
     this.ox = ox;
     this.oy = oy;
-    this._width = width;
-    this._height = height;
-    this._xInterval = xInterval;
-    this._yInterval = yInterval ? yInterval : xInterval;
-    this._grid = grid == undefined ? true : grid;
-    this._xMax = this._width / this._xInterval / 2;
-    this._xMin = -this._xMax;
-    this._yMax = this._height / this._yInterval / 2;
-    this._yMin = -this._yMax;
-    this._labelInterval = labelInterval == undefined ? 1 : labelInterval;
-    this._scale = 1;
+    this.width = width;
+    this.height = height;
+    this.xInterval = xInterval;
+    this.yInterval = yInterval ? yInterval : xInterval;
+    this.grid = grid == undefined ? true : grid;
+    this.xMax = this.width / this.xInterval / 2;
+    this.xMin = -this.xMax;
+    this.yMax = this.height / this.yInterval / 2;
+    this.yMin = -this.yMax;
+    this.labelInterval = labelInterval == undefined ? 1 : labelInterval;
+    this.scale = 1;
 
-    this._done = false;
-
-    this.mobjs = [];
-  }
-
-  add(mobj) {
-    this.mobjs.push(mobj);
-  }
-
-  get done() {
-    return this._done;
-  }
-
-  updateConfig() {
-    this._xMax = this.width / this.xInterval / 2;
-    this._xMin = -this._xMax;
-    this._yMax = this.height / this.yInterval / 2;
-    this._yMin = -this._yMax;
-  }
-
-  get labelInterval() {
-    return Math.ceil(this._labelInterval / this._scale);
-  }
-
-  get width() {
-    return this._width * this.scale;
-  }
-
-  set width(w) {
-    this._width = w;
-    this.updateConfig();
-  }
-
-  get height() {
-    return this._height * this.scale;
-  }
-
-  set height(h) {
-    this._height = h;
-    this.updateConfig();
-  }
-
-  get xInterval() {
-    return this._xInterval * this.scale;
-  }
-
-  set xInterval(xi) {
-    this._xInterval = xi;
-    this.updateConfig();
-  }
-
-  get yInterval() {
-    return this._yInterval * this.scale;
-  }
-
-  set yInterval(yi) {
-    this._yInterval = yi;
-    this.updateConfig();
-  }
-
-  get grid() {
-    return this._grid;
-  }
-
-  set grid(flag) {
-    this._grid = flag;
-  }
-
-  get scale() {
-    return this._scale;
-  }
-
-  set scale(s) {
-    this._scale = s;
-  }
-
-  get xMax() {
-    return this._xMax;
-  }
-
-  get xMin() {
-    return this._xMin;
-  }
-
-  get yMax() {
-    return this._yMax;
-  }
-
-  get yMin() {
-    return this._yMin;
-  }
-
-  showMobj(canvas = this.defaultCanvas, mobj) {
-    canvas.noFill();
-    canvas.stroke(255);
-    let env = {
-      xMin: this.xMin,
-      xMax: this.xMax,
-      yMin: this.yMin,
-      yMax: this.yMax,
-      deltaTime: canvas.deltaTime,
-      outOfRange: this.outOfRange,
-    };
-
-    let points = mobj.points(env);
-    let shapePoints = points.filter((p) => p.shape);
-    let nonShapePoints = points.filter((p) => !p.shape);
-
-    canvas.beginShape();
-    for (let p of shapePoints) {
-      let outerP = this.toOuterCoord(p);
-      canvas.vertex(outerP.x, outerP.y);
-    }
-    canvas.endShape();
-
-    canvas.fill(255, 0, 0);
-    canvas.noStroke();
-    for (let p of nonShapePoints) {
-      let outerP = this.toOuterCoord(p);
-      canvas.circle(outerP.x, outerP.y, 5);
-    }
+    this.done = false;
   }
 
   outOfRange(p) {
@@ -180,69 +60,9 @@ class Coord {
     return l * this.xInterval;
   }
 
-  // 显示复数
-  showComplexes(
-    canvas = this.defaultCanvas,
-    complexes,
-    arrow = true,
-    label = false
-  ) {
-    let arrowLen = Math.min(this.width, this.height) / 80;
+  show() {
+    let [canvas] = arguments;
 
-    for (let c of complexes) {
-      canvas.stroke(255);
-      canvas.fill(255);
-      if (arrow) {
-        canvas.line(
-          this.ox,
-          this.oy,
-          this.ox + c.re * this.xInterval,
-          this.oy - c.im * this.yInterval
-        );
-
-        let rc1 = $math
-          .complex({ r: 1, phi: ($math.pi * 4) / 5 })
-          .mul($math.complex({ r: arrowLen, phi: c.arg() }))
-          .add(c);
-        let rc2 = $math
-          .complex({ r: 1, phi: (-$math.pi * 4) / 5 })
-          .mul($math.complex({ r: arrowLen, phi: c.arg() }))
-          .add(c);
-        canvas.beginShape();
-        canvas.vertex(
-          this.ox + rc1.re * this.xInterval,
-          this.oy - rc1.im * this.yInterval
-        );
-        canvas.vertex(
-          this.ox + c.re * this.xInterval,
-          this.oy - c.im * this.yInterval
-        );
-        canvas.vertex(
-          this.ox + rc2.re * this.xInterval,
-          this.oy - rc2.im * this.yInterval
-        );
-        canvas.endShape(canvas.CLOSE);
-      } else {
-        canvas.circle(
-          this.ox + c.re * this.xInterval,
-          this.oy - c.im * this.yInterval,
-          6
-        );
-      }
-
-      // 显示标签
-      if (label) {
-        canvas.noStroke();
-        canvas.text(
-          c.format(2),
-          this.ox + c.re * this.xInterval,
-          this.oy - c.im * this.yInterval
-        );
-      }
-    }
-  }
-
-  show(canvas) {
     canvas.stroke(255);
     canvas.fill(255);
 
@@ -309,7 +129,7 @@ class Coord {
         canvas.circle(this.ox, this.oy + y, 5);
       }
     }
-    this._done = true;
+    this.done = true;
   }
 }
 

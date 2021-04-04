@@ -13,6 +13,9 @@ class Scene {
     // 每个对象均绘制在私有的图层上，场景由图层叠加形成
     this.layers = [];
 
+    //每个场景拥有统一的时间轴
+    this.t = 0;
+
     this.done = false;
   }
 
@@ -23,7 +26,7 @@ class Scene {
         let layer = this.layers[index];
         if (!obj.done) {
           layer.clear();
-          obj.show(layer, this.canvas.deltaTime);
+          obj.show(layer, this.t, this.canvas.deltaTime);
         } else if (obj instanceof Animation) {
           this.objects[index] = obj.obj;
         }
@@ -42,6 +45,8 @@ class Scene {
       }
     }
 
+
+    this.t += this.canvas.deltaTime;
     this.canvas.background(30, 30, 30);
     this.canvas.translate(this.width / 2, this.height / 2);
     updateLayers.call(this);
