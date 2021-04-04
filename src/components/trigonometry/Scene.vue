@@ -10,7 +10,11 @@ import { Scene } from "@/lib/Scene";
 // import { Partical, Line, Ellipse } from "@/series/trigonometry/c1/mobjs";
 
 import { VetorField, Partical } from "@/lib/Mobj";
+import { Text } from "@/lib/Text";
 // const $bazier = require("bezier-easing");
+
+// TODO 暂时可以用手写代替
+import katex from "katex";
 
 export default {
   mounted() {
@@ -19,7 +23,7 @@ export default {
         this.setup(p5);
       }),
         (p5.draw = () => {
-          this.draw();
+          this.draw(p5);
         });
     };
     new P5(script, "canvas");
@@ -47,10 +51,10 @@ export default {
         defaultCanvas: p5,
         ox: 0,
         oy: 0,
-        width: this.scene.width * 0.8,
-        height: this.scene.height * 0.8,
+        width: this.scene.width * 0.5,
+        height: this.scene.height * 0.5,
         xInterval: 20,
-        grid: false,
+        grid: true,
         labelInterval: 2,
       };
 
@@ -68,7 +72,8 @@ export default {
       );
 
       let vf2 = new VetorField(
-        (c) => $math.complex({ r: 1, phi: $math.pi / 2 + c.arg() }),
+        (c, t) =>
+          $math.complex({ r: 1, phi: $math.pi / 2 + c.arg() + t / 2000 }),
         {
           coord: coord,
         }
@@ -78,15 +83,11 @@ export default {
         coord: coord,
       });
 
-      // let particals = [];
-      // for (let i = 0; i < 100; i++) {
-      //   let s = $math.complex()
-      //   new Partical($math.complex())
-      // }
+      partical.addToVf(vf2.add(vf1));
 
-      // partical.addToVf(vf2.add(vf1))
+      this.scene.add(new Text());
 
-      this.scene.add(vf2.add(vf1)).add(partical);
+      // this.scene.add(vf2.add(vf1));
     },
 
     draw() {
@@ -95,7 +96,5 @@ export default {
   },
 };
 
-// TODO 柏林噪声场中粒子的运动；椭圆的性质；手拉手模型
-// TODO 精度问题，比如椭圆中粒子的碰撞可能会出去
-// TODO 数学对象临时动画的加入
+// TODO 坐标系的整体形变
 </script>

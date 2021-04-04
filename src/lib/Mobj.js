@@ -183,9 +183,9 @@ class Partical extends Mobj {
     canvas.noStroke();
     this.p = this.p.add($math.multiply(this.v, deltaTime / 1000));
 
-    this.v = this.vf ? this.vf.f(this.p) : this.v;
+    this.v = this.vf ? this.vf.f(this.p, t) : this.v;
     this.trace.push(this.p);
-    if (this.trace.length >= 40) {
+    if (this.trace.length >= 10) {
       this.trace.shift();
     }
 
@@ -198,6 +198,7 @@ class Partical extends Mobj {
         this.coord.toSceneLength(r)
       );
     }
+
   }
 
   addToVf(vf) {

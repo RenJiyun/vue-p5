@@ -21,6 +21,7 @@
     "bezier-easing": "^2.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "katex": "^0.13.0",
     "mathjs": "^9.3.0",
     "moo": "^0.5.1",
     "nearley": "^2.20.1",
@@ -40,7 +41,7 @@
       "parser": "babel-eslint"
     },
     "rules": {
-      "no-unused-vars":"off"
+      "no-unused-vars": "off"
     }
   },
   "browserslist": [
