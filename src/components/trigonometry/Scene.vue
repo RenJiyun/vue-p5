@@ -7,8 +7,15 @@ const $math = require("mathjs");
 import P5 from "p5";
 import { Coord } from "@/lib/Coord";
 import { Scene } from "@/lib/Scene";
-// import { TriangleAndCircle } from "@/series/trigonometry/c1/TriangleAndCircle";
-import { Polygon } from "@/series/trigonometry/c1/Polygon";
+import {
+  VetorField,
+  Vector,
+  PerlinNosieField,
+  Partical,
+  Line,
+} from "@/series/trigonometry/c1/mobjs";
+
+import { Function } from "@/lib/Mobj";
 
 export default {
   mounted() {
@@ -45,8 +52,8 @@ export default {
         defaultCanvas: p5,
         ox: 0,
         oy: 0,
-        width: this.scene.width,
-        height: this.scene.height,
+        width: this.scene.width * 0.8,
+        height: this.scene.height * 0.8,
         xInterval: 20,
         grid: false,
         labelInterval: 2,
@@ -55,29 +62,35 @@ export default {
       let coord = new Coord(coordConfig);
       this.scene.add(coord);
 
-      let polygon = new Polygon(coord, [
-        $math.complex(1, 1),
-        $math.complex(10, 3),
-        $math.complex(4, 12)
-      ]) 
+      this.scene.add(
+        new VetorField(coord, (c, t) => {
+          return c.mul(
+            $math.complex({ r: 1 / c.abs(), phi: $math.pi / 2 + t / 1000 })
+          );
+        })
+      );
 
-      this.scene.add(polygon)
+      this.scene.add(
+        new Vector(coord, $math.complex(0, 1), $math.complex(10, 2))
+      );
+      this.scene.pop();
+      this.scene.pop();
+      this.scene.add(new PerlinNosieField(coord));
+      this.scene.pop();
 
-      // let tc = new TriangleAndCircle(
-      //   coord,
-      //   4,
-      //   (progress) => {
-      //     return {
-      //       c: $math.complex({r: 6, phi: -$math.pi * 2 * progress}),
-      //       nc: $math.complex({r: 1, phi: -$math.pi * 2 * progress}),
-      //       l: progress * 2 * $math.pi * 6,
-      //     };
-      //   },
-      //   -$math.pi / 6,
-      //   $math.pi / 6,
-      //   $math.pi
-      // );
-      // this.scene.add(tc);
+      // this.scene.add(new Function(coord, (x) => $math.sin(x)));
+      // this.scene.pop();
+
+      this.scene.add(new Function(coord, (x) => $math.cos((x * x) / 50)));
+      this.scene.pop();
+
+      this.scene.add(
+        new Partical(coord, $math.complex(0, 0), $math.complex(3, 2))
+      );
+
+      this.scene.add(
+        new Line(coord, $math.complex(0, 8), $math.complex(22, 0))
+      );
     },
 
     draw() {
@@ -85,4 +98,6 @@ export default {
     },
   },
 };
+
+// TODO 粒子在场中的运动；粒子的尾迹； 柏林噪声场中粒子的运动；椭圆的性质；手拉手模型
 </script>
