@@ -16,6 +16,8 @@ import { Text } from "@/lib/Text";
 // TODO 暂时可以用手写代替
 import katex from "katex";
 
+import { SumOfAnglesOfATriangle } from "@/series/planegeometry/sum_of_angles_of_a_triangle";
+
 export default {
   mounted() {
     const script = (p5) => {
@@ -48,46 +50,30 @@ export default {
 
       // 添加场景中的对象
       let coordConfig = {
-        defaultCanvas: p5,
         ox: 0,
         oy: 0,
         width: this.scene.width * 0.5,
         height: this.scene.height * 0.5,
         xInterval: 20,
-        grid: true,
+        yInterval: 20,
+        grid: false,
+        label: true,
         labelInterval: 2,
       };
 
       let coord = new Coord(coordConfig);
       this.scene.add(coord);
 
-      let vf1 = new VetorField(
-        (c) => {
-          let noise = p5.noise(c.re, c.im);
-          return $math.complex({ r: 1, phi: 2 * $math.pi * noise });
-        },
-        {
-          coord: coord,
-        }
+      this.scene.add(
+        new SumOfAnglesOfATriangle(
+          $math.complex(0, 1),
+          $math.complex(8, 0),
+          $math.complex(6, 7),
+          {
+            coord: coord,
+          }
+        )
       );
-
-      let vf2 = new VetorField(
-        (c, t) =>
-          $math.complex({ r: 1, phi: $math.pi / 2 + c.arg() + t / 2000 }),
-        {
-          coord: coord,
-        }
-      );
-
-      let partical = new Partical($math.complex(0, 6), $math.complex(0, 0), {
-        coord: coord,
-      });
-
-      partical.addToVf(vf2.add(vf1));
-
-      this.scene.add(new Text());
-
-      // this.scene.add(vf2.add(vf1));
     },
 
     draw() {
@@ -96,5 +82,5 @@ export default {
   },
 };
 
-// TODO 坐标系的整体形变
+// TODO 坐标系的整体形变；通过插值的方式进行形状之间的过渡
 </script>

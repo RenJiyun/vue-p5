@@ -3,7 +3,6 @@ const $math = require("mathjs");
 class Coord {
   constructor(config) {
     let {
-      defaultCanvas,
       ox,
       oy,
       width,
@@ -11,9 +10,9 @@ class Coord {
       xInterval,
       yInterval,
       grid,
+      label,
       labelInterval,
     } = config;
-    this.defaultCanvas = defaultCanvas;
     this.ox = ox;
     this.oy = oy;
     this.width = width;
@@ -25,26 +24,14 @@ class Coord {
     this.xMin = -this.xMax;
     this.yMax = this.height / this.yInterval / 2;
     this.yMin = -this.yMax;
+    this.label = label;
     this.labelInterval = labelInterval == undefined ? 1 : labelInterval;
     this.scale = 1;
 
     this.done = false;
   }
 
-  outOfRange(p) {
-    return (
-      p.x > this.xMax || p.x < this.xMin || p.y > this.yMax || p.y < this.yMin
-    );
-  }
-
-  toOuterCoord(p) {
-    return {
-      x: this.ox + p.x * this.xInterval,
-      y: this.oy - p.y * this.yInterval,
-    };
-  }
-
-  toSceneCoord() {
+  toNativeCoord() {
     if (arguments.length == 1) {
       let c = arguments[0];
       return [this.ox + c.re * this.xInterval, this.oy - c.im * this.yInterval];
@@ -56,13 +43,17 @@ class Coord {
     }
   }
 
-  toSceneLength(l) {
+  toNativeLength(l) {
+    // 这里要求xInterval == yInterval
     return l * this.xInterval;
   }
 
-  show() {
-    let [canvas] = arguments;
+  applyTransformation(t) {
+    
+  }
 
+  show() {
+    let [canvas, t, deltaTime] = arguments;
     canvas.stroke(255);
     canvas.fill(255);
 
@@ -99,8 +90,11 @@ class Coord {
       }
 
       if (i % this.labelInterval == 0) {
-        canvas.text(i, this.ox + x + 5, this.oy + 15);
-        canvas.text(-i, this.ox - x + 5, this.oy + 15);
+        if (this.label) {
+          canvas.text(i, this.ox + x + 5, this.oy + 15);
+          canvas.text(-i, this.ox - x + 5, this.oy + 15);
+        }
+
         canvas.circle(this.ox + x, this.oy, 5);
         canvas.circle(this.ox - x, this.oy, 5);
       }
@@ -123,8 +117,11 @@ class Coord {
       }
 
       if (i != 0 && i % this.labelInterval == 0) {
-        canvas.text(i, this.ox - 15, this.oy - y - 5);
-        canvas.text(-i, this.ox - 20, this.oy + y - 5);
+        if (this.label) {
+          canvas.text(i, this.ox - 15, this.oy - y - 5);
+          canvas.text(-i, this.ox - 20, this.oy + y - 5);
+        }
+
         canvas.circle(this.ox, this.oy - y, 5);
         canvas.circle(this.ox, this.oy + y, 5);
       }

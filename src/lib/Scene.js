@@ -1,4 +1,5 @@
 import { Animation } from "./Animation";
+import { Mobj } from "./Mobj";
 
 class Scene {
   constructor(config) {
@@ -21,15 +22,15 @@ class Scene {
 
   show() {
     function updateLayers() {
+      this.done = true;
       for (let index = 0; index < this.objects.length; index++) {
         let obj = this.objects[index];
         let layer = this.layers[index];
         if (!obj.done) {
+          this.done = false;
           layer.clear();
           obj.show(layer, this.t, this.canvas.deltaTime);
-        } else if (obj instanceof Animation) {
-          this.objects[index] = obj.obj;
-        }
+        } 
       }
     }
 
@@ -45,13 +46,13 @@ class Scene {
       }
     }
 
-
     this.t += this.canvas.deltaTime;
     this.canvas.background(30, 30, 30);
     this.canvas.translate(this.width / 2, this.height / 2);
     updateLayers.call(this);
     showLayers.call(this);
     if (this.done) {
+      console.log("all layers done!")
       this.canvas.noLoop();
     }
   }
@@ -62,6 +63,18 @@ class Scene {
     layer.background(0, 0, 0, 0);
     layer.translate(this.width / 2, this.height / 2);
     this.layers.push(layer);
+
+    if (obj instanceof Mobj) {
+      let innerLayers = [];
+      let layerNum = obj.states().length;
+      for (let i = 0; i < layerNum; i++) {
+        let innerLayer = this.canvas.createGraphics(this.width, this.height);
+        innerLayer.background(0, 0, 0, 0);
+        innerLayer.translate(this.width / 2, this.height / 2);
+        innerLayers.push(innerLayer);
+      }
+      obj.layers = innerLayers;
+    }
 
     return this;
   }
