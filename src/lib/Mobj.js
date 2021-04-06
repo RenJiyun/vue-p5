@@ -9,12 +9,12 @@ class Mobj {
 
     this.done = false;
     this._layers = [];
-    this.state = 0;
+    this.state = null;
 
     this.initialized = false;
 
     // 每个状态有自己的局部时间线
-    this.stateTimelines = [];
+    this.stateTimelines = {};
   }
 
   set layers(layers) {
@@ -26,15 +26,8 @@ class Mobj {
   }
 
   init() {
-    // 初始化状态的时间线
-    this.states().forEach(() => {
-      this.stateTimelines.push(0);
-    });
+    this.state = this.enter();
     this.initialized = true;
-  }
-
-  next() {
-    this.state++;
   }
 
   show() {
@@ -55,22 +48,26 @@ class Mobj {
       );
     }
 
-    let timeline = this.stateTimelines[this.state];
-
-    timeline += deltaTime;
-    this.stateTimelines[this.state] = timeline;
-    if (this.state == this.states().length) {
+    if (this.state == undefined) {
       this.done = true;
       return;
     }
-    let sf = this.states()[this.state];
-    let innerCanvas = this.layers[this.state];
-    // 初始化内部图层的基本参数
+
+    let timeline = this.stateTimelines[this.state.fn.name] || 0;
+
+    this.stateTimelines[this.state.fn.name] = timeline + deltaTime;
+    let innerCanvas = this.layers[this.state.layer];
     innerCanvas.clear();
     innerCanvas.noFill();
     innerCanvas.stroke(255);
     innerCanvas.strokeWeight(3);
-    sf.bind(this)(innerCanvas, timeline, t, deltaTime, ...rest);
+    this.state = this.state.fn.bind(this)(
+      innerCanvas,
+      timeline,
+      t,
+      deltaTime,
+      ...rest
+    );
   }
 }
 

@@ -27,47 +27,36 @@ class SumOfAnglesOfATriangle extends Mobj {
   }
 
   create() {
-    let [canvas, lt] = arguments;
-    let duration = 600;
-    let easing = $bazier(1, 0.08, 0.85, 0.09);
-
-    if (this.state == 0) {
-      canvas.noFill();
-      canvas.stroke(255);
-
-      lt = Math.min(lt, duration);
-
-      if (lt >= duration) {
-        this.next();
-      }
-
-      let progress = lt / duration;
-      let currentLength =
-        canvas.map(lt, 0, duration, 0, this.length) * easing(progress);
-
-      canvas.beginShape();
-      for (let i = 0; i < this.vertexes.length - 1; i++) {
-        let sv = this.vertexes[i];
-        let ev = this.vertexes[i + 1];
-        canvas.vertex(...this.coord.toNativeCoord(sv));
-        let edge = ev.sub(sv);
-        if (currentLength > edge.abs()) {
-          currentLength -= edge.abs();
-          // TODO 精度问题：剩余的currentLength有可能比最后一条边长还大，此时continue会使得循环退出，从而最后一条边消失
-          continue;
-        } else {
-          let ratio = currentLength / edge.abs();
-          let cc = sv.add($math.multiply(edge, ratio));
-          canvas.vertex(...this.coord.toNativeCoord(cc));
-          break;
+    let [canvas, lt, t, deltaTime, nativeCanvas] = arguments;
+    if (this._create_polyline_ == undefined) {
+      this._create_polyline_ = new Polyline(
+        [this.A, this.B, this.C, this.A],
+        { strokeWeight: 3, stroke: [255, 255, 255], fill: false },
+        { duration: 500 },
+        {
+          coord: this.coord,
         }
-      }
+      );
+      let innerCanvas = nativeCanvas.createGraphics(
+        canvas.width,
+        canvas.height
+      );
+      innerCanvas.background(0, 0, 0, 0);
+      innerCanvas.translate(canvas.width / 2, canvas.height / 2);
+      this._create_polyline_.layers = [innerCanvas];
+    }
+    this._create_polyline_.show(canvas, t, deltaTime);
 
-      // 用于修复上述的精度问题
-      if (this.state != 0) {
-        canvas.vertex(...this.coord.toNativeCoord(this.vertexes[0]));
-      }
-      canvas.endShape();
+    if (this._create_polyline_.done) {
+      return {
+        fn: this.markTheAngles,
+        layer: 1,
+      };
+    } else {
+      return {
+        fn: this.create,
+        layer: 0,
+      };
     }
   }
 
@@ -105,7 +94,10 @@ class SumOfAnglesOfATriangle extends Mobj {
     mark.bind(this)(canvas, B, BA, BC, 1.5);
     mark.bind(this)(canvas, C, CA, CB, 1.5);
 
-    this.next();
+    return {
+      fn: this.drawTheParallelOfBC,
+      layer: 2,
+    };
   }
 
   drawTheParallelOfBC() {
@@ -133,53 +125,100 @@ class SumOfAnglesOfATriangle extends Mobj {
     this.v1 = v1;
 
     if (progress >= 1) {
-      this.next();
+      return {
+        fn: this.highlightAngleB,
+        layer: 3,
+      };
+    } else {
+      return {
+        fn: this.drawTheParallelOfBC,
+        layer: 2,
+      };
     }
   }
 
   // 演示B的内错角
   highlightAngleB() {
     let [canvas, lt, t, deltaTime, nativeCanvas] = arguments;
-    let polyline = this.polyline;
-    if (polyline == undefined) {
-      polyline = new Polyline([this.v1, this.A, this.B, this.C], {
-        coord: this.coord,
-      });
+    if (this._highlightAngleB_polyline_ == undefined) {
+      this._highlightAngleB_polyline_ = new Polyline(
+        [this.v1, this.A, this.B, this.C],
+        { fill: false, strokeWeight: 10, stroke: [0, 255, 0, 100] },
+        { duration: 500, easing: $bazier(1, 0.08, 0.85, 0.09) },
+        {
+          coord: this.coord,
+        }
+      );
       let innerCanvas = nativeCanvas.createGraphics(
         canvas.width,
         canvas.height
       );
       innerCanvas.background(0, 0, 0, 0);
       innerCanvas.translate(canvas.width / 2, canvas.height / 2);
-      polyline.layers = [innerCanvas];
-      this.polyline = polyline;
+      this._highlightAngleB_polyline_.layers = [innerCanvas];
     }
-    polyline.show(canvas, t, deltaTime);
-    if (polyline.done) {
-      this.next();
+    this._highlightAngleB_polyline_.show(canvas, t, deltaTime);
+    if (this._highlightAngleB_polyline_.done) {
+      return {
+        fn: this.highlightAngleC,
+        layer: 4,
+      };
+    } else {
+      return {
+        fn: this.highlightAngleB,
+        layer: 3,
+      };
     }
-
-    // TODO高亮显示后如何渐出？ 生成器是不是可以解决这个问题
   }
 
   // 演示C的内错角
   highlightAngleC() {
-    this.next();
+    let [canvas, lt, t, deltaTime, nativeCanvas] = arguments;
+    if (this._highlightAngleC_polyline_ == undefined) {
+      this._highlightAngleC_polyline_ = new Polyline(
+        [this.v0, this.A, this.C, this.B],
+        { fill: false, strokeWeight: 10, stroke: [255, 0, 0, 100] },
+        { duration: 500, easing: $bazier(1, 0.08, 0.85, 0.09) },
+        {
+          coord: this.coord,
+        }
+      );
+      let innerCanvas = nativeCanvas.createGraphics(
+        canvas.width,
+        canvas.height
+      );
+      innerCanvas.background(0, 0, 0, 0);
+      innerCanvas.translate(canvas.width / 2, canvas.height / 2);
+      this._highlightAngleC_polyline_.layers = [innerCanvas];
+    }
+    this._highlightAngleC_polyline_.show(canvas, t, deltaTime);
+    if (this._highlightAngleC_polyline_.done) {
+      return {
+        fn: this.showTheFlatAngle,
+        layer: 5,
+      };
+    } else {
+      return {
+        fn: this.highlightAngleC,
+        layer: 4,
+      };
+    }
   }
 
   showTheFlatAngle() {
-    this.next();
+      return;
   }
 
-  states() {
-    return [
-      this.create,
-      this.markTheAngles,
-      this.drawTheParallelOfBC,
-      this.highlightAngleB,
-      this.highlightAngleC,
-      this.showTheFlatAngle,
-    ];
+  // 返回需要的图层数量
+  layerNum() {
+    return 6;
+  }
+
+  enter() {
+    return {
+      fn: this.create,
+      layer: 0,
+    };
   }
 }
 

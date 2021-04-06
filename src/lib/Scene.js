@@ -17,6 +17,7 @@ class Scene {
     this.t = 0;
 
     this.done = false;
+
   }
 
   show() {
@@ -65,8 +66,7 @@ class Scene {
 
     if (obj instanceof Mobj) {
       let innerLayers = [];
-      let layerNum = obj.states().length;
-      for (let i = 0; i < layerNum; i++) {
+      for (let i = 0; i < obj.layerNum(); i++) {
         let innerLayer = this.canvas.createGraphics(this.width, this.height);
         innerLayer.background(0, 0, 0, 0);
         innerLayer.translate(this.width / 2, this.height / 2);

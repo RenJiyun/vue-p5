@@ -4,22 +4,23 @@
 
 <script>
 const $math = require("mathjs");
-import P5 from "p5";
+import p5 from "p5";
+// import 'p5/lib/addons/p5.sound';
 import { Coord } from "@/lib/Coord";
 import { Scene } from "@/lib/Scene";
 import { SumOfAnglesOfATriangle } from "@/series/planegeometry/sum_of_angles_of_a_triangle";
 
 export default {
   mounted() {
-    const script = (p5) => {
-      (p5.setup = () => {
-        this.setup(p5);
+    const script = (_) => {
+      (_.setup = () => {
+        this.setup(_);
       }),
-        (p5.draw = () => {
-          this.draw(p5);
+        (_.draw = () => {
+          this.draw(_);
         });
     };
-    new P5(script, "canvas");
+    new p5(script, "canvas");
   },
 
   data() {
@@ -37,6 +38,7 @@ export default {
         width: 1280,
         height: 720,
       };
+   
       this.scene = new Scene(sceneConfig);
 
       // 添加场景中的对象
