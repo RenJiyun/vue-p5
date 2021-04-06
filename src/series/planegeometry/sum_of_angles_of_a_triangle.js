@@ -1,4 +1,5 @@
-import { Mobj, Polyline } from "@/lib/Mobj";
+import Mobj from "@/lib/Mobj";
+import Polyline from "@/lib/Polyline";
 const $math = require("mathjs");
 const $bazier = require("bezier-easing");
 
@@ -144,7 +145,10 @@ class SumOfAnglesOfATriangle extends Mobj {
       polyline = new Polyline([this.v1, this.A, this.B, this.C], {
         coord: this.coord,
       });
-      let innerCanvas = nativeCanvas.createGraphics(canvas.width, canvas.height);
+      let innerCanvas = nativeCanvas.createGraphics(
+        canvas.width,
+        canvas.height
+      );
       innerCanvas.background(0, 0, 0, 0);
       innerCanvas.translate(canvas.width / 2, canvas.height / 2);
       polyline.layers = [innerCanvas];

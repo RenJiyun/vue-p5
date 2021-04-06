@@ -1,5 +1,4 @@
-import { Animation } from "./Animation";
-import { Mobj } from "./Mobj";
+import Mobj from "./Mobj";
 
 class Scene {
   constructor(config) {
@@ -30,7 +29,7 @@ class Scene {
           this.done = false;
           layer.clear();
           obj.show(layer, this.t, this.canvas.deltaTime, this.canvas);
-        } 
+        }
       }
     }
 
@@ -52,7 +51,7 @@ class Scene {
     updateLayers.call(this);
     showLayers.call(this);
     if (this.done) {
-      console.log("all layers done!")
+      console.log("all layers done!");
       this.canvas.noLoop();
     }
   }
