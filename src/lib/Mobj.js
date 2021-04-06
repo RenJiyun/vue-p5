@@ -2,6 +2,8 @@
  * 数学对象均需要关联特定的坐标系，并且坐标由复数表示
  */
 const $math = require("mathjs");
+const $bazier = require("bezier-easing");
+
 
 class Mobj {
   constructor() {
@@ -32,6 +34,7 @@ class Mobj {
     this.states().forEach(() => {
       this.stateTimelines.push(0);
     });
+    this.initialized = true;
   }
 
   next() {
@@ -43,7 +46,7 @@ class Mobj {
       this.init();
     }
 
-    let [outCanvas, t, deltaTime] = arguments;
+    let [outCanvas, t, deltaTime, ...rest] = arguments;
 
     // 合成内部图层
     for (let i = 0; i < this.layers.length; i++) {
@@ -56,9 +59,10 @@ class Mobj {
       );
     }
 
-    
     let timeline = this.stateTimelines[this.state];
-    this.stateTimelines[this.state] = timeline += deltaTime;
+
+    timeline += deltaTime;
+    this.stateTimelines[this.state] = timeline;
     if (this.state == this.states().length) {
       this.done = true;
       return;
@@ -69,7 +73,8 @@ class Mobj {
     innerCanvas.clear();
     innerCanvas.noFill();
     innerCanvas.stroke(255);
-    sf.bind(this)(innerCanvas, timeline, t, deltaTime);
+    innerCanvas.strokeWeight(3);
+    sf.bind(this)(innerCanvas, timeline, t, deltaTime, ...rest);
   }
 }
 
@@ -86,7 +91,7 @@ class Circle extends Mobj {
     canvas.beginShape();
     let delta = 0.05;
     for (let angle = 0; angle <= $math.pi * 2 + delta; angle += delta) {
-      let { x, y } = this.coord.toSceneCoord(
+      let { x, y } = this.coord.toNativeCoord(
         this.c0.add($math.complex({ r: this.r, phi: angle }))
       );
       canvas.vertex(x, y);
@@ -105,7 +110,7 @@ class Circle extends Mobj {
       angle <= ($math.pi * 2 + delta) * progress;
       angle += delta
     ) {
-      let { x, y } = this.coord.toSceneCoord(
+      let { x, y } = this.coord.toNativeCoord(
         this.c0.add($math.complex({ r: this.r, phi: angle }))
       );
       canvas.vertex(x, y);
@@ -139,7 +144,7 @@ class Function extends Mobj {
     let xMax =
       this.coord.xMin + (this.coord.xMax + delta - this.coord.xMin) * progress;
     for (let x = this.coord.xMin; x <= xMax; x += delta) {
-      canvas.vertex(...this.coord.toSceneCoord(x, this.f(x)));
+      canvas.vertex(...this.coord.toNativeCoord(x, this.f(x)));
     }
     canvas.endShape();
   }
@@ -158,7 +163,7 @@ class Vector extends Mobj {
     let e = this.e;
     canvas.noFill();
     canvas.stroke(255);
-    canvas.line(...this.coord.toSceneCoord(s), ...this.coord.toSceneCoord(e));
+    canvas.line(...this.coord.toNativeCoord(s), ...this.coord.toNativeCoord(e));
     let se = e.sub(s);
     let angle = ($math.pi / 6) * 5;
     let lc = e.add(se.mul($math.complex({ r: 0.2 / se.abs(), phi: angle })));
@@ -166,9 +171,9 @@ class Vector extends Mobj {
     canvas.fill(255);
     canvas.noStroke();
     canvas.beginShape();
-    canvas.vertex(...this.coord.toSceneCoord(e));
-    canvas.vertex(...this.coord.toSceneCoord(lc));
-    canvas.vertex(...this.coord.toSceneCoord(rc));
+    canvas.vertex(...this.coord.toNativeCoord(e));
+    canvas.vertex(...this.coord.toNativeCoord(lc));
+    canvas.vertex(...this.coord.toNativeCoord(rc));
     canvas.endShape(canvas.CLOSE);
     this._done = true;
   }
@@ -232,7 +237,7 @@ class Partical extends Mobj {
   //     this.current = 0;
   //   }
   //   canvas.circle(
-  //     ...this.coord.toSceneCoord(this.p),
+  //     ...this.coord.toNativeCoord(this.p),
   //     this.coord.toSceneLength(0.5)
   //   );
   // }
@@ -253,7 +258,7 @@ class Partical extends Mobj {
       let t = canvas.map(i, 0, this.trace.length - 1, 10, 255);
       canvas.fill(0, 0, 255, t);
       canvas.circle(
-        ...this.coord.toSceneCoord(this.trace[i]),
+        ...this.coord.toNativeCoord(this.trace[i]),
         this.coord.toSceneLength(r)
       );
     }
@@ -264,4 +269,64 @@ class Partical extends Mobj {
   }
 }
 
-export { Mobj, Circle, Function, Vector, VetorField, Partical };
+class Polyline extends Mobj {
+  constructor() {
+    let [vertexes, ...rest] = arguments;
+    super(...rest);
+    this.vertexes = vertexes;
+
+    this.length = 0;
+    for (let i = 0; i < this.vertexes.length - 1; i++) {
+      let edge = this.vertexes[i + 1].add(this.vertexes[i].neg());
+      this.length = this.length + edge.abs();
+    }
+
+    this.easing = $bazier(1, 0.08, 0.85, 0.09);
+  }
+
+  draw() {
+    let duration = 1000;
+    let [canvas, lt] = arguments;
+    canvas.noFill();
+    canvas.stroke(0, 255, 0, 100);
+    canvas.strokeJoin(canvas.ROUND);
+    canvas.strokeWeight(20);
+
+    
+
+    lt = Math.min(lt, duration);
+
+    let progress = lt / duration;
+    let currentLength =
+      canvas.map(lt, 0, duration, 0, this.length) * this.easing(progress);
+
+
+    canvas.beginShape();
+    for (let i = 0; i < this.vertexes.length - 1; i++) {
+      let sv = this.vertexes[i];
+      let ev = this.vertexes[i + 1];
+      canvas.vertex(...this.coord.toNativeCoord(sv));
+      let edge = ev.sub(sv);
+      if (currentLength > edge.abs()) {
+        currentLength -= edge.abs();
+        continue;
+      } else {
+        let ratio = currentLength / edge.abs();
+        let cc = sv.add($math.multiply(edge, ratio));
+        canvas.vertex(...this.coord.toNativeCoord(cc));
+        break;
+      }
+    }
+    canvas.endShape();
+
+    if (lt >= duration) {
+      this.next();
+    }
+  }
+
+  states() {
+    return [this.draw];
+  }
+}
+
+export { Mobj, Circle, Function, Vector, VetorField, Partical, Polyline };

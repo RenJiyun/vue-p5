@@ -12,6 +12,7 @@ class Coord {
       grid,
       label,
       labelInterval,
+      display
     } = config;
     this.ox = ox;
     this.oy = oy;
@@ -27,7 +28,8 @@ class Coord {
     this.label = label;
     this.labelInterval = labelInterval == undefined ? 1 : labelInterval;
     this.scale = 1;
-
+    this.display = display == undefined ? true : display;
+    
     this.done = false;
   }
 
@@ -53,6 +55,10 @@ class Coord {
   }
 
   show() {
+    if (!this.display) {
+      this.done = true;
+      return;
+    }
     let [canvas, t, deltaTime] = arguments;
     canvas.stroke(255);
     canvas.fill(255);

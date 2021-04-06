@@ -29,7 +29,7 @@ class Scene {
         if (!obj.done) {
           this.done = false;
           layer.clear();
-          obj.show(layer, this.t, this.canvas.deltaTime);
+          obj.show(layer, this.t, this.canvas.deltaTime, this.canvas);
         } 
       }
     }

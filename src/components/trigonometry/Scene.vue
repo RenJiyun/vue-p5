@@ -9,7 +9,7 @@ import { Coord } from "@/lib/Coord";
 import { Scene } from "@/lib/Scene";
 // import { Partical, Line, Ellipse } from "@/series/trigonometry/c1/mobjs";
 
-import { VetorField, Partical } from "@/lib/Mobj";
+import { Polyline } from "@/lib/Mobj";
 import { Text } from "@/lib/Text";
 // const $bazier = require("bezier-easing");
 
@@ -52,13 +52,14 @@ export default {
       let coordConfig = {
         ox: 0,
         oy: 0,
-        width: this.scene.width * 0.5,
-        height: this.scene.height * 0.5,
+        width: this.scene.width,
+        height: this.scene.height,
         xInterval: 20,
         yInterval: 20,
         grid: false,
         label: true,
         labelInterval: 2,
+        display: false,
       };
 
       let coord = new Coord(coordConfig);
@@ -66,9 +67,10 @@ export default {
 
       this.scene.add(
         new SumOfAnglesOfATriangle(
-          $math.complex(0, 1),
-          $math.complex(8, 0),
-          $math.complex(6, 7),
+          $math.complex(0, 10),
+          $math.complex(-8, -6),
+          $math.complex(12, -6),
+
           {
             coord: coord,
           }
@@ -82,5 +84,4 @@ export default {
   },
 };
 
-// TODO 坐标系的整体形变；通过插值的方式进行形状之间的过渡
 </script>
