@@ -7,15 +7,6 @@ const $math = require("mathjs");
 import P5 from "p5";
 import { Coord } from "@/lib/Coord";
 import { Scene } from "@/lib/Scene";
-// import { Partical, Line, Ellipse } from "@/series/trigonometry/c1/mobjs";
-
-import { Polyline } from "@/lib/Mobj";
-import { Text } from "@/lib/Text";
-// const $bazier = require("bezier-easing");
-
-// TODO 暂时可以用手写代替
-import katex from "katex";
-
 import { SumOfAnglesOfATriangle } from "@/series/planegeometry/sum_of_angles_of_a_triangle";
 
 export default {
@@ -83,5 +74,4 @@ export default {
     },
   },
 };
-
 </script>
