@@ -1,14 +1,10 @@
 import Mobj from "./Mobj";
 const $math = require("mathjs");
-const $bazier = require("bezier-easing");
 
 class Polyline extends Mobj {
-  constructor() {
-    let [vertexes, p5config, aconfig, econfig] = arguments;
-    super(econfig);
+  constructor(vertexes, ..._) {
+    super(..._);
     this._vertexes = vertexes;
-    this._p5config = p5config;
-    this._aconfig = aconfig;
 
     this._length = 0;
     for (let i = 0; i < this._vertexes.length - 1; i++) {
@@ -18,21 +14,10 @@ class Polyline extends Mobj {
   }
 
   draw(canvas, env) {
-    let { lt, duration } = env.getDurationState();
+    this._configCanvas(canvas);
+    let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((x) => x);
-
-    if (!this._p5config.fill) {
-      canvas.noFill();
-    }
-    canvas.stroke(...this._p5config.stroke);
-    canvas.strokeWeight(this._p5config.strokeWeight);
-    canvas.strokeJoin(canvas.ROUND);
-
-    lt = Math.min(lt, duration);
-
-    let progress = lt / duration;
-    let currentLength =
-      canvas.map(lt, 0, duration, 0, this._length) * easing(progress);
+    let currentLength = canvas.map(easing(progress), 0, 1, 0, this._length);
 
     canvas.beginShape();
     for (let i = 0; i < this._vertexes.length - 1; i++) {
@@ -58,7 +43,9 @@ class Polyline extends Mobj {
   }
 
   _submit() {
-    return this._execNode(this.draw, 0).withDuration(this._aconfig.duration).submit();
+    return this._execNode(this.draw, 0)
+      .withDuration(this._aconfig.duration)
+      .submit();
   }
 }
 

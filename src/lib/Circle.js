@@ -1,49 +1,41 @@
 import Mobj from "./Mobj";
 const $math = require("mathjs");
-const $bazier = require("bezier-easing");
 
 class Circle extends Mobj {
-  constructor(coord, c0, r) {
-    super(coord);
-    this.c0 = c0;
-    this.r = r;
+  constructor(c0, r, ..._) {
+    super(..._);
+    this._c0 = c0;
+    this._r = r;
   }
 
-  show(canvas) {
-    canvas.noFill();
-    canvas.stroke(255);
-    canvas.beginShape();
-    let delta = 0.05;
-    for (let angle = 0; angle <= $math.pi * 2 + delta; angle += delta) {
-      let { x, y } = this.coord.toNativeCoord(
-        this.c0.add($math.complex({ r: this.r, phi: angle }))
-      );
-      canvas.vertex(x, y);
-    }
-    canvas.endShape();
-    this._done = true;
-  }
+  draw(canvas, env) {
+    let easing = this._aconfig.easing || ((x) => x);
+    this._configCanvas(canvas);
+    let progress = this._getProgress(env.getDurationState());
 
-  create(canvas, progress) {
-    canvas.noFill();
-    canvas.stroke(255);
     canvas.beginShape();
     let delta = 0.05;
     for (
       let angle = 0;
-      angle <= ($math.pi * 2 + delta) * progress;
+      angle <= ($math.pi * 2 + delta) * easing(progress);
       angle += delta
     ) {
-      let { x, y } = this.coord.toNativeCoord(
+      let { x, y } = this.toNativeCoord(
         this.c0.add($math.complex({ r: this.r, phi: angle }))
       );
       canvas.vertex(x, y);
     }
     canvas.endShape();
+  }
 
-    if (progress >= 1) {
-      this._done = true;
-    }
+  get _layerNum() {
+    return 1;
+  }
+
+  _submit() {
+    return this._execNode(this.draw, 0)
+      .withDuration(this._aconfig.duration)
+      .submit();
   }
 }
 

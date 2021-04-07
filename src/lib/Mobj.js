@@ -1,6 +1,3 @@
-const $math = require("mathjs");
-const $bazier = require("bezier-easing");
-
 class ExecStructure {
   constructor() {}
 
@@ -115,13 +112,32 @@ class Parallel extends ExecStructure {
 }
 
 class Mobj {
-  constructor(econfig) {
+  constructor(p5config, aconfig, econfig) {
+    this._p5config = p5config;
+    this._aconfig = aconfig;
     this._coord = econfig.coord;
     this._p5 = econfig.p5;
     this._done = false;
     this._layers = [];
     this._initialized = false;
     this._execGraph;
+  }
+
+  _getProgress() {
+    let { lt, duration } = arguments[0];
+    lt = Math.min(lt, duration);
+    return lt / duration;
+  }
+
+  _configCanvas(canvas) {
+    if (!this._p5config.fill) {
+      canvas.noFill();
+    } else {
+      canvas.fill(...this._p5config.fill);
+    }
+    canvas.stroke(...this._p5config.stroke);
+    canvas.strokeWeight(this._p5config.strokeWeight);
+    canvas.strokeJoin(canvas.ROUND);
   }
 
   get done() {

@@ -1,11 +1,15 @@
 <template>
-  <div id="canvas"></div>
+  <div id="canvas">
+    <audio src="/static/audios/do_wrong.mp3"></audio>
+  </div>
 </template>
 
 <script>
 const $math = require("mathjs");
-import p5 from "p5";
-// import 'p5/lib/addons/p5.sound';
+import * as p5 from "p5";
+window.p5 = p5;
+require("p5/lib/addons/p5.sound");
+
 import Coord from "@/lib/Coord";
 import Scene from "@/lib/Scene";
 import { SumOfAnglesOfATriangle } from "@/series/planegeometry/sum_of_angles_of_a_triangle";
@@ -20,6 +24,7 @@ export default {
           this.draw(_);
         });
     };
+
     new p5(script, "canvas");
   },
 
@@ -32,6 +37,8 @@ export default {
 
   methods: {
     setup(p5) {
+      // let ding = p5.loadSound("http://localhost:2015/audio/ding.mp3");
+
       // 场景配置
       let sceneConfig = {
         p5: p5,

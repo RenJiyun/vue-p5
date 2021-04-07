@@ -6,7 +6,7 @@ const $bazier = require("bezier-easing");
 // 三角形内角和定理
 class SumOfAnglesOfATriangle extends Mobj {
   constructor(A, B, C, econfig) {
-    super(econfig);
+    super({}, {}, econfig);
     this.A = A;
     this.B = B;
     this.C = C;

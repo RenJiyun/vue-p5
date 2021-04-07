@@ -3,14 +3,13 @@ const $math = require("mathjs");
 const $bazier = require("bezier-easing");
 
 class Vector extends Mobj {
-  constructor(s, e, ...rest) {
-    super(...rest);
-    this.s = s;
-    this.e = e;
+  constructor(s, e, ..._) {
+    super(..._);
+    this._s = s;
+    this._e = e;
   }
 
-  show() {
-    let [canvas] = arguments;
+  draw(canvas, env, done) {
     let s = this.s;
     let e = this.e;
     canvas.noFill();
@@ -28,6 +27,16 @@ class Vector extends Mobj {
     canvas.vertex(...this.coord.toNativeCoord(rc));
     canvas.endShape(canvas.CLOSE);
     this._done = true;
+  }
+
+  get _layerNum() {
+    return 1;
+  }
+
+  _submit() {
+    return this._execNode(this.draw, 0)
+      .withDuration(this._aconfig.duration)
+      .submit();
   }
 }
 
