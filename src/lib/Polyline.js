@@ -4,41 +4,41 @@ const $bazier = require("bezier-easing");
 
 class Polyline extends Mobj {
   constructor() {
-    let [vertexes, p5config, aconfig, ...rest] = arguments;
-    super(...rest);
-    this.vertexes = vertexes;
-    this.p5config = p5config;
-    this.aconfig = aconfig;
+    let [vertexes, p5config, aconfig, econfig] = arguments;
+    super(econfig);
+    this._vertexes = vertexes;
+    this._p5config = p5config;
+    this._aconfig = aconfig;
 
-    this.length = 0;
-    for (let i = 0; i < this.vertexes.length - 1; i++) {
-      let edge = this.vertexes[i + 1].add(this.vertexes[i].neg());
-      this.length = this.length + edge.abs();
+    this._length = 0;
+    for (let i = 0; i < this._vertexes.length - 1; i++) {
+      let edge = this._vertexes[i + 1].add(this._vertexes[i].neg());
+      this._length = this._length + edge.abs();
     }
   }
 
-  draw() {
-    let duration = this.aconfig.duration;
-    let easing = this.aconfig.easing || ((x) => x);
-    let [canvas, lt] = arguments;
-    if (!this.p5config.fill) {
+  draw(canvas, env) {
+    let { lt, duration } = env.getDurationState();
+    let easing = this._aconfig.easing || ((x) => x);
+
+    if (!this._p5config.fill) {
       canvas.noFill();
     }
-    canvas.stroke(...this.p5config.stroke);
-    canvas.strokeWeight(this.p5config.strokeWeight);
+    canvas.stroke(...this._p5config.stroke);
+    canvas.strokeWeight(this._p5config.strokeWeight);
     canvas.strokeJoin(canvas.ROUND);
 
     lt = Math.min(lt, duration);
 
     let progress = lt / duration;
     let currentLength =
-      canvas.map(lt, 0, duration, 0, this.length) * easing(progress);
+      canvas.map(lt, 0, duration, 0, this._length) * easing(progress);
 
     canvas.beginShape();
-    for (let i = 0; i < this.vertexes.length - 1; i++) {
-      let sv = this.vertexes[i];
-      let ev = this.vertexes[i + 1];
-      canvas.vertex(...this.coord.toNativeCoord(sv));
+    for (let i = 0; i < this._vertexes.length - 1; i++) {
+      let sv = this._vertexes[i];
+      let ev = this._vertexes[i + 1];
+      canvas.vertex(...this.toNativeCoord(sv));
       let edge = ev.sub(sv);
       if (currentLength > edge.abs()) {
         currentLength -= edge.abs();
@@ -46,31 +46,19 @@ class Polyline extends Mobj {
       } else {
         let ratio = currentLength / edge.abs();
         let cc = sv.add($math.multiply(edge, ratio));
-        canvas.vertex(...this.coord.toNativeCoord(cc));
+        canvas.vertex(...this.toNativeCoord(cc));
         break;
       }
     }
     canvas.endShape();
-
-    if (lt >= duration) {
-      return;
-    } else {
-      return {
-        fn: this.draw,
-        layer: 0,
-      };
-    }
   }
 
-  layerNum() {
+  get _layerNum() {
     return 1;
   }
 
-  enter() {
-    return {
-      fn: this.draw,
-      layer: 0,
-    };
+  _submit() {
+    return this._execNode(this.draw, 0).withDuration(this._aconfig.duration).submit();
   }
 }
 

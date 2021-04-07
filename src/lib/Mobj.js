@@ -1,73 +1,204 @@
 const $math = require("mathjs");
 const $bazier = require("bezier-easing");
 
-class Mobj {
-  constructor() {
-    let [config] = arguments;
-    this.config = config;
-    this.coord = config.coord;
+class ExecStructure {
+  constructor() {}
 
-    this.done = false;
-    this._layers = [];
-    this.state = null;
+  submit() {
+    return () => {
+      if (this instanceof ExecNode && !this.done) {
+        return [this];
+      } else if (this instanceof Sequence) {
+        let es = this._ess.find((e) => !e.done);
+        if (!es) {
+          return [];
+        }
+        return es.submit()();
+      } else if (this instanceof Parallel) {
+        return this._ess
+          .map((es) => es.submit()())
+          .reduce((a, b) => a.concat(b), []);
+      }
+      return [];
+    };
+  }
+}
 
-    this.initialized = false;
-
-    // 每个状态有自己的局部时间线
-    this.stateTimelines = {};
+// 执行节点
+class ExecNode extends ExecStructure {
+  constructor(fn, layer) {
+    super();
+    this._fn = fn;
+    this._layer = layer;
+    this._done = false;
+    this._lt = 0;
   }
 
-  set layers(layers) {
-    this._layers = layers;
+  get done() {
+    return this._done;
   }
 
-  get layers() {
-    return this._layers;
+  get layer() {
+    return this._layer;
   }
 
-  init() {
-    this.state = this.enter();
-    this.initialized = true;
-  }
-
-  show() {
-    if (!this.initialized) {
-      this.init();
+  execute(that, canvas, p5) {
+    if (this._duration != undefined && this._lt >= this._duration) {
+      this._done = true;
     }
 
-    let [outCanvas, t, deltaTime, ...rest] = arguments;
+    // 使得_fn有对状态_done的控制权
+    this._call(that, canvas);
 
-    // 合成内部图层
-    for (let i = 0; i < this.layers.length; i++) {
-      outCanvas.image(
-        this.layers[i],
-        -outCanvas.width / 2,
-        -outCanvas.height / 2,
-        outCanvas.width,
-        outCanvas.height
-      );
+    if (this._duration != undefined) {
+      this._lt += p5.deltaTime;
     }
+  }
 
-    if (this.state == undefined) {
-      this.done = true;
-      return;
-    }
-
-    let timeline = this.stateTimelines[this.state.fn.name] || 0;
-
-    this.stateTimelines[this.state.fn.name] = timeline + deltaTime;
-    let innerCanvas = this.layers[this.state.layer];
-    innerCanvas.clear();
-    innerCanvas.noFill();
-    innerCanvas.stroke(255);
-    innerCanvas.strokeWeight(3);
-    this.state = this.state.fn.bind(this)(
-      innerCanvas,
-      timeline,
-      t,
-      deltaTime,
-      ...rest
+  _call(that, canvas) {
+    this._fn.bind(that)(
+      canvas,
+      this,
+      ((_) => {
+        this._done = _;
+      }).bind(this)
     );
+  }
+
+  withDuration(duration) {
+    if (this._duration != undefined) {
+      throw new Error("duration is already set");
+    }
+    this._duration = duration;
+    return this;
+  }
+
+  getDurationState() {
+    if (this._duration == undefined) {
+      throw new Error("duration is not set");
+    }
+
+    return {
+      lt: this._lt,
+      duration: this._duration,
+    };
+  }
+
+  getMobjState(name, fn) {
+    if (this[name] == undefined) {
+      this[name] = fn();
+    }
+    return this[name];
+  }
+}
+
+class Sequence extends ExecStructure {
+  constructor(ess) {
+    super();
+    this._ess = ess;
+  }
+
+  get done() {
+    return this._ess.every((e) => e.done);
+  }
+}
+
+class Parallel extends ExecStructure {
+  constructor(ess) {
+    super();
+    this._ess = ess;
+  }
+
+  get done() {
+    return this._ess.every((e) => e.done);
+  }
+}
+
+class Mobj {
+  constructor(econfig) {
+    this._coord = econfig.coord;
+    this._p5 = econfig.p5;
+    this._done = false;
+    this._layers = [];
+    this._initialized = false;
+    this._execGraph;
+  }
+
+  get done() {
+    return this._done;
+  }
+
+  get _econfig() {
+    return {
+      coord: this._coord,
+      p5: this._p5,
+    };
+  }
+
+  _sequence(...ess) {
+    return new Sequence(ess);
+  }
+
+  _parallel(...ess) {
+    return new Parallel(ess);
+  }
+
+  _execNode(fn, layer) {
+    return new ExecNode(fn, layer);
+  }
+
+  toNativeCoord() {
+    return this._coord.toNativeCoord(...arguments);
+  }
+
+  toNativeLength() {
+    return this._coord.toNativeLength(...arguments);
+  }
+
+  _init() {
+    // 生成所需的图层
+    let [width, height] = [this._p5.width, this._p5.height];
+    for (let i = 0; i < this._layerNum; i++) {
+      let layer = this._p5.createGraphics(width, height);
+      layer.background(0, 0, 0, 0);
+      layer.translate(width / 2, height / 2);
+      this._layers.push(layer);
+    }
+
+    // 提交执行图
+    this._execGraph = this._submit();
+    this._initialized = true;
+  }
+
+  show(canvas) {
+    if (!this._initialized) {
+      this._init();
+    }
+
+    let clearedLayers = new Set();
+
+    let ens = this._execGraph();
+    this._done = ens.length == 0;
+    for (let node of ens) {
+      let layer = this._layers[node.layer];
+      if (!clearedLayers.has(layer)) {
+        layer.clear();
+        clearedLayers.add(layer);
+      }
+      node.execute(this, layer, this._p5);
+    }
+
+    this._layers.forEach((layer) => {
+      canvas.image(
+        layer,
+        -layer.width / 2,
+        -layer.height / 2,
+        layer.width,
+        layer.height
+      );
+    });
+
+    return this._done;
   }
 }
 
