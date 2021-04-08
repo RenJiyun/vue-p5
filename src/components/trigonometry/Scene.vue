@@ -6,12 +6,16 @@
 
 <script>
 const $math = require("mathjs");
+const $bazier = require("bezier-easing");
 import * as p5 from "p5";
 window.p5 = p5;
 require("p5/lib/addons/p5.sound");
 
 import Coord from "@/lib/Coord";
 import Scene from "@/lib/Scene";
+import Arc from "@/lib/Arc";
+import Parallel from "@/lib/Parallel";
+import Alpha from "@/lib/Alpha";
 import { SumOfAnglesOfATriangle } from "@/series/planegeometry/sum_of_angles_of_a_triangle";
 
 export default {
@@ -59,7 +63,7 @@ export default {
         grid: false,
         label: true,
         labelInterval: 5,
-        display: true,
+        display: false,
       };
 
       let coord = new Coord(coordConfig);
@@ -74,10 +78,34 @@ export default {
           coord: coord,
         }
       );
-      this.scene.add(obj);
+      // this.scene.add(obj);
+
+      let arc = new Arc(
+        $math.complex(0, 0),
+        10,
+        ($math.pi * 3) / 2,
+        $math.pi,
+        { fill: [0, 255, 0, 100], stroke: false, strokeWeight: 3 },
+        { duration: 1000, easing: $bazier(0.09, 0.75, 0.96, 0.49) },
+        { p5: p5, coord: coord }
+      );
+
+      // this.scene.add(arc);
+
+      let parallel = new Parallel(
+        $math.complex(3, 4),
+        $math.complex(5, 0),
+        { fill: false, stroke: [255, 255, 255, 255], strokeWeight: 2 },
+        {},
+        { p5: p5, coord: coord }
+      );
+
+      parallel.draw();
+
+      this.scene.add(new Alpha(parallel, { duration: 1000 }));
     },
 
-    draw() {
+    draw(p5) {
       this.scene.show();
     },
   },

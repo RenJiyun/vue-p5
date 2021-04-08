@@ -2,7 +2,7 @@ class ExecStructure {
   constructor() {}
 
   submit() {
-    return () => {
+    return (fn) => {
       if (this instanceof ExecNode && !this.done) {
         return [this];
       } else if (this instanceof Sequence) {
@@ -135,8 +135,13 @@ class Mobj {
     } else {
       canvas.fill(...this._p5config.fill);
     }
-    canvas.stroke(...this._p5config.stroke);
-    canvas.strokeWeight(this._p5config.strokeWeight);
+    if (!this._p5config.stroke) {
+      canvas.noStroke();
+    } else {
+      canvas.stroke(...this._p5config.stroke);
+      canvas.strokeWeight(this._p5config.strokeWeight || 1);
+    }
+
     canvas.strokeJoin(canvas.ROUND);
   }
 
@@ -163,12 +168,26 @@ class Mobj {
     return new ExecNode(fn, layer);
   }
 
+  animate(p, fname) {
+    p._submit = () => {
+      return p
+        ._execNode(p[fname], 0)
+        .withDuration(p._aconfig.duration)
+        .submit();
+    };
+    return p;
+  }
+
   toNativeCoord() {
     return this._coord.toNativeCoord(...arguments);
   }
 
   toNativeLength() {
     return this._coord.toNativeLength(...arguments);
+  }
+
+  toNativeAngle(angle) {
+    return -angle;
   }
 
   _init() {
@@ -184,6 +203,11 @@ class Mobj {
     // 提交执行图
     this._execGraph = this._submit();
     this._initialized = true;
+  }
+
+  _reset() {
+    this._done = false;
+    
   }
 
   show(canvas) {

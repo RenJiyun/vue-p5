@@ -1,7 +1,9 @@
-import Mobj from "@/lib/Mobj";
-import Polyline from "@/lib/Polyline";
 const $math = require("mathjs");
 const $bazier = require("bezier-easing");
+import Mobj from "@/lib/Mobj";
+import Polyline from "@/lib/Polyline";
+import Angle from "@/lib/Angle";
+import Parallel from "@/lib/Parallel";
 
 // 三角形内角和定理
 class SumOfAnglesOfATriangle extends Mobj {
@@ -13,108 +15,125 @@ class SumOfAnglesOfATriangle extends Mobj {
   }
 
   create(canvas, env, done) {
+    let { duration } = env.getDurationState();
     let polyline = env.getMobjState("create", () => {
       return new Polyline(
         [this.A, this.B, this.C, this.A],
         { fill: false, strokeWeight: 3, stroke: [255, 255, 255] },
-        { duration: 2000, easing: $bazier(1, 0.08, 0.85, 0.09) },
+        { duration: duration, easing: $bazier(1, 0.08, 0.85, 0.09) },
         this._econfig
       );
     });
     done(polyline.show(canvas));
   }
 
-  markTheAngles(canvas, env, done) {
-    function mark(canvas, v, c0, c1, r) {
-      canvas.noFill();
-      canvas.stroke(255);
-      canvas.beginShape();
-      canvas.vertex(...this.toNativeCoord(v));
-
-      for (let k = 0; k <= 1; k += 0.1) {
-        let m = v.add(
-          $math.complex({ r: r, phi: c0.arg() * k + c1.arg() * (1 - k) })
+  _markAngle(name, A, O, B) {
+    return (canvas, env, done) => {
+      let { duration } = env.getDurationState();
+      let angle = env.getMobjState(name, () => {
+        return new Angle(
+          A,
+          O,
+          B,
+          name,
+          { fill: [0, 0, 255, 100], strokeWeight: 2, stroke: false },
+          { duration: duration, easing: $bazier(1, 0.08, 0.85, 0.09) },
+          this._econfig
         );
-        canvas.vertex(...this.toNativeCoord(m));
-      }
-      canvas.vertex(...this.toNativeCoord(v));
-      canvas.endShape();
-    }
-    let [A, B, C] = [this.A, this.B, this.C];
-
-    let AB = B.sub(A);
-    let AC = C.sub(A);
-
-    let BA = A.sub(B);
-    let BC = C.sub(B);
-
-    let CA = A.sub(C);
-    let CB = B.sub(C);
-
-    mark.bind(this)(canvas, A, AB, AC, 1.5);
-    mark.bind(this)(canvas, B, BA, BC, 1.5);
-    mark.bind(this)(canvas, C, CA, CB, 1.5);
-    done(true);
+      });
+      done(angle.show(canvas));
+    };
   }
-
-  drawTheParallelOfBC(canvas, env) {
-    let { lt, duration } = env.getDurationState();
-    let [A, B, C] = [this.A, this.B, this.C];
-    let BC = C.sub(B);
-    let progress = lt / duration;
-    let easing = $bazier(1, 0.08, 0.85, 0.09);
-    let v0 = A.add($math.multiply(BC, easing(progress)));
-    let v1 = A.add($math.multiply(BC, -easing(progress)));
-    canvas.noFill();
-    canvas.stroke(255);
-    canvas.line(...this.toNativeCoord(v0), ...this.toNativeCoord(v1));
-    this.v0 = v0;
-    this.v1 = v1;
-  }
-
-  highlightAngleB(canvas, env, done) {
-    let polyline = env.getMobjState("highlightAngleB", () => {
-      return new Polyline(
-        [this.v1, this.A, this.B, this.C],
-        { fill: false, strokeWeight: 10, stroke: [0, 255, 0, 100] },
-        { duration: 500, easing: $bazier(1, 0.08, 0.85, 0.09) },
+  drawTheParallelOfBC(canvas, env, done) {
+    let parallel = env.getMobjState("drawTheParallelOfBC", () => {
+      return new Parallel(
+        this.A,
+        this.B.sub(this.C),
+        { fill: false, strokeWeight: 3, stroke: [255] },
+        { duration: 300, easing: $bazier(1, 0.08, 0.85, 0.09) },
         this._econfig
       );
     });
-    done(polyline.show(canvas));
+
+    done(parallel.show(canvas));
   }
 
-  // 演示C的内错角
-  highlightAngleC(canvas, env, done) {
-    let polyline = env.getMobjState("highlightAngleC", () => {
-      return new Polyline(
-        [this.v0, this.A, this.C, this.B],
-        { fill: false, strokeWeight: 10, stroke: [255, 0, 0, 100] },
-        { duration: 500, easing: $bazier(1, 0.08, 0.85, 0.09) },
-        this._econfig
-      );
-    });
-    done(polyline.show(canvas));
+  _createZ(name, points) {
+    return (canvas, env, done) => {
+      let polyline = env.getMobjState(name, () => {
+        return new Polyline(
+          points,
+          { fill: false, strokeWeight: 10, stroke: [0, 255, 0, 100] },
+          { duration: 1000, easing: $bazier(1, 0.08, 0.85, 0.09) },
+          this._econfig
+        );
+      });
+      done(polyline.show(canvas));
+    };
+  }
+
+  createZB(canvas, env, done) {
+    let v = this.A.add(this.B.sub(this.C));
+    this._createZ("createZB", [v, this.A, this.B, this.C])(canvas, env, done);
+  }
+
+  createZC(canvas, env, done) {
+    let v = this.A.add(this.C.sub(this.B));
+    this._createZ("createZC", [v, this.A, this.C, this.B])(canvas, env, done);
+  }
+
+  _fadeZ(name, points) {
+    return (canvas, env, done) => {
+      let polyline = env.getMobjState(name, () => {
+        let p = new Polyline(
+          points,
+          { fill: false, strokeWeight: 10, stroke: [0, 255, 0, 100] },
+          { duration: 1000, easing: $bazier(1, 0.08, 0.85, 0.09) },
+          this._econfig
+        );
+        return this.animate(p, "fadeOut");
+      });
+      done(polyline.show(canvas));
+    };
+  }
+
+  fadeZB(canvas, env, done) {
+    let v = this.A.add(this.B.sub(this.C));
+    this._fadeZ("fadeZB", [v, this.A, this.B, this.C])(canvas, env, done);
+  }
+
+  fadeZC(canvas, env, done) {
+    let v = this.A.add(this.C.sub(this.B));
+    this._fadeZ("fadeZC", [v, this.A, this.C, this.B])(canvas, env, done);
   }
 
   showTheFlatAngle(canvas, env) {}
 
   get _layerNum() {
-    return 5;
+    return 9;
   }
 
   _submit() {
     return this._sequence(
-      this._parallel(
-        this._execNode(this.create, 0).withDuration(1000),
-        this._execNode(this.markTheAngles, 1),
-        this._execNode(this.drawTheParallelOfBC, 2).withDuration(1000)
-      ),
-      this._parallel(
-        this._execNode(this.highlightAngleB, 3).withDuration(500),
-        this._execNode(this.highlightAngleC, 3).withDuration(500)
-      ),
-      this._execNode(this.showTheFlatAngle, 4).withDuration(500)
+      this._execNode(this.create, 1).withDuration(500),
+      this._execNode(
+        this._markAngle("λ", this.B, this.A, this.C),
+        2
+      ).withDuration(100),
+      this._execNode(
+        this._markAngle("β", this.C, this.B, this.A),
+        3
+      ).withDuration(100),
+      this._execNode(
+        this._markAngle("γ", this.A, this.C, this.B),
+        4
+      ).withDuration(100),
+      this._execNode(this.drawTheParallelOfBC, 5).withDuration(500),
+      this._execNode(this.createZB, 6).withDuration(500),
+      this._execNode(this.fadeZB, 6).withDuration(600),
+      this._execNode(this.createZC, 7).withDuration(500),
+      this._execNode(this.fadeZC, 7).withDuration(600),
+      this._execNode(this.showTheFlatAngle, 8).withDuration(500)
     ).submit();
   }
 }

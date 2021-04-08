@@ -13,7 +13,7 @@ class Polyline extends Mobj {
     }
   }
 
-  draw(canvas, env) {
+  create(canvas, env) {
     this._configCanvas(canvas);
     let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((x) => x);
@@ -38,12 +38,28 @@ class Polyline extends Mobj {
     canvas.endShape();
   }
 
+  fadeOut(canvas, env) {
+    let progress = this._getProgress(env.getDurationState());
+    let easing = this._aconfig.easing || ((x) => x);
+    this._configCanvas(canvas);
+    let stroke = this._p5config.stroke;
+    let alphaMax = stroke[3];
+    let alpha = canvas.map(easing(progress), 0, 1, alphaMax, 0);
+
+    canvas.stroke(...this._p5config.stroke.slice(0, 3), alpha);
+    canvas.beginShape();
+    this._vertexes.forEach((v) => {
+      canvas.vertex(...this.toNativeCoord(v));
+    });
+    canvas.endShape();
+  }
+
   get _layerNum() {
     return 1;
   }
 
   _submit() {
-    return this._execNode(this.draw, 0)
+    return this._execNode(this.create, 0)
       .withDuration(this._aconfig.duration)
       .submit();
   }
