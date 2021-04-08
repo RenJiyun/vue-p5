@@ -102,7 +102,7 @@ export default {
 
       parallel.draw();
 
-      this.scene.add(new Alpha(parallel, { duration: 1000 }));
+      this.scene.add((new Alpha(parallel, { duration: 1000 })));
     },
 
     draw(p5) {

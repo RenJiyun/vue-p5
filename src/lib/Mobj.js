@@ -3,20 +3,30 @@ class ExecStructure {
 
   submit() {
     return (fn) => {
-      if (this instanceof ExecNode && !this.done) {
-        return [this];
-      } else if (this instanceof Sequence) {
-        let es = this._ess.find((e) => !e.done);
-        if (!es) {
-          return [];
+      if (fn) {
+        if (this instanceof ExecNode) {
+          fn(this);
+        } else {
+          this._ess.forEach((es) => {
+            es.submit()(fn);
+          });
         }
-        return es.submit()();
-      } else if (this instanceof Parallel) {
-        return this._ess
-          .map((es) => es.submit()())
-          .reduce((a, b) => a.concat(b), []);
+      } else {
+        if (this instanceof ExecNode && !this.done) {
+          return [this];
+        } else if (this instanceof Sequence) {
+          let es = this._ess.find((e) => !e.done);
+          if (!es) {
+            return [];
+          }
+          return es.submit()();
+        } else if (this instanceof Parallel) {
+          return this._ess
+            .map((es) => es.submit()())
+            .reduce((a, b) => a.concat(b), []);
+        }
+        return [];
       }
-      return [];
     };
   }
 }
@@ -207,7 +217,7 @@ class Mobj {
 
   _reset() {
     this._done = false;
-    
+    this._execGraph((es) => (es._done = false));
   }
 
   show(canvas) {
