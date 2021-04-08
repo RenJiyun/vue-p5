@@ -37,6 +37,14 @@ class Coord {
     return this._done;
   }
 
+  get xMin() {
+    return this._xMin;
+  }
+
+  get xMax() {
+    return this._xMax;
+  }
+
   toNativeCoord() {
     if (arguments.length == 1) {
       let c = arguments[0];

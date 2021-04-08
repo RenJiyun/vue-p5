@@ -15,6 +15,7 @@ import Coord from "@/lib/Coord";
 import Scene from "@/lib/Scene";
 import Arc from "@/lib/Arc";
 import Parallel from "@/lib/Parallel";
+import Function from "@/lib/Function";
 import Alpha from "@/lib/Alpha";
 import { SumOfAnglesOfATriangle } from "@/series/planegeometry/sum_of_angles_of_a_triangle";
 
@@ -62,8 +63,8 @@ export default {
         yInterval: 20,
         grid: false,
         label: true,
-        labelInterval: 5,
-        display: false,
+        labelInterval: 3,
+        display: true,
       };
 
       let coord = new Coord(coordConfig);
@@ -102,7 +103,17 @@ export default {
 
       parallel.draw();
 
-      this.scene.add((new Alpha(parallel, { duration: 1000 })));
+      // this.scene.add(new Alpha(parallel, { duration: 1000 }));
+
+      let f = new Function(
+        (x) => $math.sin(x),
+        { fill: false, stroke: [255, 255, 255, 255], strokeWeight: 2 },
+        { duration: 2000, easing: $bazier(0.09, 0.75, 0.96, 0.49) },
+        { p5: p5, coord: coord }
+      );
+      let alpha1 = new Alpha(f.create()).blink(20, 2000);
+      let alpha2 = new Alpha(f.draw()).fadeOut(1000);
+      this.scene.add(alpha1._p(alpha2));
     },
 
     draw(p5) {

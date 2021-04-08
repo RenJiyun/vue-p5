@@ -178,15 +178,7 @@ class Mobj {
     return new ExecNode(fn, layer);
   }
 
-  animate(p, fname) {
-    p._submit = () => {
-      return p
-        ._execNode(p[fname], 0)
-        .withDuration(p._aconfig.duration)
-        .submit();
-    };
-    return p;
-  }
+  /************************************************ math hepler function *************************************************************/
 
   toNativeCoord() {
     return this._coord.toNativeCoord(...arguments);
@@ -199,6 +191,16 @@ class Mobj {
   toNativeAngle(angle) {
     return -angle;
   }
+
+  get xrange() {
+    return [this._coord.xMin, this._coord.xMax];
+  }
+
+  map(v, vmin, vmax, mmin, mmax) {
+    return this._p5.map(v, vmin, vmax, mmin, mmax);
+  }
+
+  /*************************************************************************************************************/
 
   _init() {
     // 生成所需的图层

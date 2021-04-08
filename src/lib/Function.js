@@ -1,31 +1,60 @@
 import Mobj from "./Mobj";
-const $math = require("mathjs");
-const $bazier = require("bezier-easing");
 
 class Function extends Mobj {
-  constructor(coord, f, config) {
-    super(coord);
-    this.f = f;
-    this.config = config || {};
-    // this.easing = $bazier(1, 0.08, 0.85, 0.09);
+  constructor(f, ..._) {
+    super(..._);
+    this._f = f;
   }
 
-  show() {
-    let [canvas, t] = arguments;
-    let progress = Math.min(t / (this.config.duration || 1000), 1);
-
-    progress = this.config.easing ? this.config.easing(progress) : progress;
-    let delta = this.config.delta || 0.1;
-
-    canvas.noFill();
-    canvas.stroke(255);
+  _create(canvas, env) {
+    this._configCanvas(canvas);
+    let progress = this._getProgress(env.getDurationState());
+    let easing = this._aconfig.easing || ((_) => _);
+    let delta = 0.1;
     canvas.beginShape();
     let xMax =
-      this.coord.xMin + (this.coord.xMax + delta - this.coord.xMin) * progress;
-    for (let x = this.coord.xMin; x <= xMax; x += delta) {
-      canvas.vertex(...this.coord.toNativeCoord(x, this.f(x)));
+      this.xrange[0] +
+      (this.xrange[1] + delta - this.xrange[0]) * easing(progress);
+    for (let x = this.xrange[0]; x <= xMax; x += delta) {
+      canvas.vertex(...this.toNativeCoord(x, this._f(x)));
     }
     canvas.endShape();
+  }
+
+  _draw(canvas, env, done) {
+    this._configCanvas(canvas);
+    let delta = 0.1;
+    canvas.beginShape();
+    let xMax = this.xrange[0] + (this.xrange[1] + delta - this.xrange[0]);
+    for (let x = this.xrange[0]; x <= xMax; x += delta) {
+      canvas.vertex(...this.toNativeCoord(x, this._f(x)));
+    }
+    canvas.endShape();
+    done(true);
+  }
+
+  get _layerNum() {
+    return 1;
+  }
+
+  create() {
+    this._submit = () => {
+      return this._execNode(this._create, 0)
+        .withDuration(this._aconfig.duration)
+        .submit();
+    };
+    return this;
+  }
+
+  draw() {
+    this._submit = () => {
+      return this._execNode(this._draw, 0).submit();
+    };
+    return this;
+  }
+
+  _submit() {
+    throw new Error("pick an animation");
   }
 }
 
