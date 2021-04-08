@@ -57,18 +57,26 @@ export default {
       let coordConfig = {
         ox: 0,
         oy: 0,
-        width: this.scene.width,
-        height: this.scene.height,
+        width: this.scene.width * 0.8,
+        height: this.scene.height * 0.8,
         xInterval: 20,
         yInterval: 20,
-        grid: false,
+        grid: true,
         label: true,
         labelInterval: 3,
         display: true,
       };
 
-      let coord = new Coord(coordConfig);
-      this.scene.add(coord);
+      let coord = new Coord(
+        coordConfig,
+        {},
+        {},
+        {
+          p5: p5,
+        }
+      );
+
+      this.scene.add(coord.create());
 
       let obj = new SumOfAnglesOfATriangle(
         $math.complex(0, 10),
@@ -113,7 +121,7 @@ export default {
       );
       let alpha1 = new Alpha(f.create()).blink(20, 2000);
       let alpha2 = new Alpha(f.draw()).fadeOut(1000);
-      this.scene.add(alpha1._p(alpha2));
+      // this.scene.add(alpha1._s(alpha2));
     },
 
     draw(p5) {

@@ -101,7 +101,6 @@ class Alpha extends Mobj {
     return this;
   }
 
-  // 串连效果
   _s(alpha) {
     this._submit = () => {
       return this._sequence(this._es, alpha._es).submit();
