@@ -37,8 +37,10 @@ export default {
         $m
           .square([0, 0], 10)
           .stroke(255, 255, 255, 255)
+          .strokeWeight(3)
           .create(500)
-          .fadeIn(2000)
+          // .translate([2, 10], 5000)
+          .rotate(pi / 6, 5000)
       );
     },
 

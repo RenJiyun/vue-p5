@@ -24,8 +24,16 @@ class Translation extends Transformation {
     canvas.translate(
       ...this.toNativeCoord(multiply(this._dv, easing(progress)))
     );
-    done(this._mobj.show(canvas));
-
+    this._mobj.show(canvas);
+    if (progress >= 1 && !this._mobj.done) {
+      done(false);
+      canvas.pop();
+      return;
+    } else if (progress >= 1 && this._mobj.done) {
+      canvas.pop();
+      return;
+    }
+    this._mobj._reset();
     canvas.pop();
   }
 

@@ -14,6 +14,11 @@ class Mobj extends SceneObj {
     return this;
   }
 
+  strokeWeight() {
+    this._p5config.strokeWeight = arguments[0];
+    return this;
+  }
+
   translate(dv, duration, easing) {
     if (dv instanceof Array) {
       dv = complex(...dv);
@@ -33,9 +38,9 @@ class Mobj extends SceneObj {
     return new Alpha(this).fadeIn(duration, easing);
   }
 
-  create(duration) {
+  create(duration, easing) {
     if (this._create != undefined && typeof this._create == "function") {
-      return this._create(duration);
+      return this._create(duration, easing);
     }
   }
 }

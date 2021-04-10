@@ -56,7 +56,8 @@ class Polyline extends Mobj {
     return this._execNode(this._default, 0).submit();
   }
 
-  _create(duration) {
+  _create(duration, easing) {
+    this._aconfig.easing = easing;
     this._submit = () => {
       return this._execNode(this._create_0, 0)
         .withDuration(duration || 500)
