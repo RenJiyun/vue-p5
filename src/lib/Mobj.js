@@ -1,3 +1,4 @@
+
 class ExecStructure {
   constructor() {}
 
@@ -67,7 +68,9 @@ class ExecNode extends ExecStructure {
       canvas,
       this,
       ((_) => {
+        // 执行节点和Mobj的状态均应该设置成指定的值
         this._done = _;
+        that._done = _;
       }).bind(this)
     );
   }
@@ -200,6 +203,28 @@ class Mobj {
     return this._p5.map(v, vmin, vmax, mmin, mmax);
   }
 
+  // translate(dv) {
+  //   return new Translation(
+  //     dv,
+  //     this,
+  //     {
+  //       duration: this._aconfig.duration || 500,
+  //     },
+  //     this._econfig
+  //   ).slide();
+  // }
+
+  // rotate(theta) {
+  //   return new Rotation(
+  //     theta,
+  //     this,
+  //     {
+  //       duration: this._aconfig.duration || 500,
+  //     },
+  //     this._econfig
+  //   ).rotate();
+  // }
+
   /*************************************************************************************************************/
 
   _init() {
@@ -230,6 +255,7 @@ class Mobj {
     let clearedLayers = new Set();
 
     let ens = this._execGraph();
+
     this._done = ens.length == 0;
     for (let node of ens) {
       let layer = this._layers[node.layer];

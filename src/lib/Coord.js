@@ -129,7 +129,6 @@ class Coord extends Mobj {
     }
   }
 
-
   _draw(canvas, env, done) {
     if (!this._display) {
       done(true);
@@ -211,21 +210,25 @@ class Coord extends Mobj {
     done(true);
   }
 
-  _submit() {
+
+  default() {
     this._layerNum = 1;
-    return this._execNode(this._draw, 0).submit();
+    this._submit = () => {
+      return this._execNode(this._draw, 0).submit();
+    };
+    return this;
   }
 
   create() {
     if (!this._display) {
-      return;
+      return this.default();
     }
     this._layerNum = 3;
     this._submit = () => {
       return this._sequence(
         this._execNode(this._create_0, 0).withDuration(500),
         this._execNode(this._create_1, 1).withDuration(500),
-        this._execNode(this._create_2, 2).withDuration(500),
+        this._execNode(this._create_2, 2).withDuration(500)
       ).submit();
     };
 
