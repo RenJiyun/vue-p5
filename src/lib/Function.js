@@ -1,12 +1,12 @@
 import Mobj from "./Mobj";
 
 class Function extends Mobj {
-  constructor(f, ..._) {
-    super(..._);
+  constructor(f, econfig) {
+    super({ fill: false }, {}, econfig);
     this._f = f;
   }
 
-  _create(canvas, env) {
+  _create_0(canvas, env) {
     this._configCanvas(canvas);
     let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((_) => _);
@@ -21,7 +21,7 @@ class Function extends Mobj {
     canvas.endShape();
   }
 
-  _draw(canvas, env, done) {
+  _default(canvas, env, done) {
     this._configCanvas(canvas);
     let delta = 0.1;
     canvas.beginShape();
@@ -37,24 +37,18 @@ class Function extends Mobj {
     return 1;
   }
 
-  create() {
+  _create(duration, easing) {
+    this._aconfig.easing = easing;
     this._submit = () => {
-      return this._execNode(this._create, 0)
-        .withDuration(this._aconfig.duration)
+      return this._execNode(this._create_0, 0)
+        .withDuration(duration || 500)
         .submit();
     };
     return this;
   }
 
-  draw() {
-    this._submit = () => {
-      return this._execNode(this._draw, 0).submit();
-    };
-    return this;
-  }
-
   _submit() {
-    throw new Error("pick an animation");
+    return this._execNode(this._default, 0).submit();
   }
 }
 

@@ -1,9 +1,9 @@
 import SceneObj from "./SceneObj";
 
-class Transformation extends SceneObj {
+class Animation extends SceneObj {
   constructor() {
     super(...arguments);
   }
 }
 
-export default Transformation;
+export default Animation;

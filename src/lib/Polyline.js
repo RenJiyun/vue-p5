@@ -2,8 +2,8 @@ import Mobj from "./Mobj";
 const $math = require("mathjs");
 
 class Polyline extends Mobj {
-  constructor(vertexes, ..._) {
-    super(..._);
+  constructor(vertexes, econfig) {
+    super({ fill: false }, {}, econfig);
     this._vertexes = vertexes;
 
     this._length = 0;
@@ -13,7 +13,7 @@ class Polyline extends Mobj {
     }
   }
 
-  create(canvas, env) {
+  _create_0(canvas, env) {
     this._configCanvas(canvas);
     let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((x) => x);
@@ -38,20 +38,14 @@ class Polyline extends Mobj {
     canvas.endShape();
   }
 
-  fadeOut(canvas, env) {
-    let progress = this._getProgress(env.getDurationState());
-    let easing = this._aconfig.easing || ((x) => x);
+  _default(canvas, env, done) {
     this._configCanvas(canvas);
-    let stroke = this._p5config.stroke;
-    let alphaMax = stroke[3];
-    let alpha = canvas.map(easing(progress), 0, 1, alphaMax, 0);
-
-    canvas.stroke(...this._p5config.stroke.slice(0, 3), alpha);
     canvas.beginShape();
-    this._vertexes.forEach((v) => {
-      canvas.vertex(...this.toNativeCoord(v));
-    });
+    for (let i = 0; i < this._vertexes.length; i++) {
+      canvas.vertex(...this.toNativeCoord(this._vertexes[i]));
+    }
     canvas.endShape();
+    done(true);
   }
 
   get _layerNum() {
@@ -59,9 +53,16 @@ class Polyline extends Mobj {
   }
 
   _submit() {
-    return this._execNode(this.create, 0)
-      .withDuration(this._aconfig.duration)
-      .submit();
+    return this._execNode(this._default, 0).submit();
+  }
+
+  _create(duration) {
+    this._submit = () => {
+      return this._execNode(this._create_0, 0)
+        .withDuration(duration || 500)
+        .submit();
+    };
+    return this;
   }
 }
 

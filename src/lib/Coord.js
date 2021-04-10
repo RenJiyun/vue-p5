@@ -31,6 +31,8 @@ class Coord extends Mobj {
     this._labelInterval = labelInterval == undefined ? 1 : labelInterval;
     this._scale = 1;
     this._display = display == undefined ? true : display;
+
+    this._layerNum = 1;
   }
 
   get xMin() {
@@ -129,7 +131,7 @@ class Coord extends Mobj {
     }
   }
 
-  _draw(canvas, env, done) {
+  _default(canvas, env, done) {
     if (!this._display) {
       done(true);
       return;
@@ -210,18 +212,13 @@ class Coord extends Mobj {
     done(true);
   }
 
-
-  default() {
-    this._layerNum = 1;
-    this._submit = () => {
-      return this._execNode(this._draw, 0).submit();
-    };
-    return this;
+  _submit() {
+    return this._execNode(this._default, 0).submit();
   }
 
   create() {
     if (!this._display) {
-      return this.default();
+      return this;
     }
     this._layerNum = 3;
     this._submit = () => {

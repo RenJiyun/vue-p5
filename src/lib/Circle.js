@@ -2,17 +2,16 @@ import Mobj from "./Mobj";
 const $math = require("mathjs");
 
 class Circle extends Mobj {
-  constructor(c0, r, ..._) {
-    super(..._);
-    this._c0 = c0;
+  constructor(O, r, econfig) {
+    super({ fill: false }, {}, econfig);
+    this._O = O;
     this._r = r;
   }
 
-  draw(canvas, env) {
+  _create_0(canvas, env) {
     let easing = this._aconfig.easing || ((x) => x);
     this._configCanvas(canvas);
     let progress = this._getProgress(env.getDurationState());
-
     canvas.beginShape();
     let delta = 0.05;
     for (
@@ -20,12 +19,22 @@ class Circle extends Mobj {
       angle <= ($math.pi * 2 + delta) * easing(progress);
       angle += delta
     ) {
-      let { x, y } = this.toNativeCoord(
-        this.c0.add($math.complex({ r: this.r, phi: angle }))
+      canvas.vertex(
+        ...this.toNativeCoord(
+          this._O.add($math.complex({ r: this._r, phi: angle }))
+        )
       );
-      canvas.vertex(x, y);
     }
     canvas.endShape();
+  }
+
+  _default(canvas, env, done) {
+    this._configCanvas(canvas);
+    canvas.circle(
+      ...this.toNativeCoord(this._O),
+      2 * this.toNativeLength(this._r)
+    );
+    done(true);
   }
 
   get _layerNum() {
@@ -33,9 +42,17 @@ class Circle extends Mobj {
   }
 
   _submit() {
-    return this._execNode(this.draw, 0)
-      .withDuration(this._aconfig.duration)
-      .submit();
+    return this._execNode(this._default, 0).submit();
+  }
+
+  _create(duration) {
+    this._submit = () => {
+      return this._execNode(this._create_0, 0)
+        .withDuration(duration || 500)
+        .submit();
+    };
+
+    return this;
   }
 }
 

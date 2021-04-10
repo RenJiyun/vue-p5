@@ -1,8 +1,8 @@
 import Transformation from "./Transformation";
 
 class Rotation extends Transformation {
-  constructor(theta, mobj, ..._) {
-    super(..._);
+  constructor(theta, mobj, econfig) {
+    super({}, {}, econfig);
     this._theta = theta;
     this._mobj = mobj;
   }
@@ -20,9 +20,8 @@ class Rotation extends Transformation {
     canvas.push();
     let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((_) => _);
-    canvas.rotate(-this._theta * easing(progress));
-    this._mobj.show(canvas);
-
+    canvas.rotate(this.toNativeAngle(this._theta * easing(progress)));
+    done(this._mobj.show(canvas));
     canvas.pop();
   }
 
@@ -34,10 +33,11 @@ class Rotation extends Transformation {
     return this._execNode(this._default, 0).submit();
   }
 
-  rotate() {
+  rotate(duration, easing) {
+    this._aconfig.easing = easing;
     this._submit = () => {
       return this._execNode(this._rotate, 0)
-        .withDuration(this._aconfig.duration)
+        .withDuration(duration)
         .submit();
     };
     return this;

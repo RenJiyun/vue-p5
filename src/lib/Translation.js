@@ -2,8 +2,8 @@ import { multiply } from "mathjs";
 import Transformation from "./Transformation";
 
 class Translation extends Transformation {
-  constructor(dv, mobj, ..._) {
-    super(..._);
+  constructor(dv, mobj, econfig) {
+    super({}, {}, econfig);
     this._dv = dv;
     this._mobj = mobj;
   }
@@ -24,7 +24,7 @@ class Translation extends Transformation {
     canvas.translate(
       ...this.toNativeCoord(multiply(this._dv, easing(progress)))
     );
-    this._mobj.show(canvas);
+    done(this._mobj.show(canvas));
 
     canvas.pop();
   }
@@ -37,10 +37,11 @@ class Translation extends Transformation {
     return this._execNode(this._default, 0).submit();
   }
 
-  slide() {
+  slide(duration, easing) {
+    this._aconfig.easing = easing;
     this._submit = () => {
       return this._execNode(this._slide, 0)
-        .withDuration(this._aconfig.duration)
+        .withDuration(duration || 500)
         .submit();
     };
     return this;

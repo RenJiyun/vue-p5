@@ -1,7 +1,6 @@
-import Mobj from "./Mobj";
 const $math = require("mathjs");
-
-class Alpha extends Mobj {
+import Animation from "./Animation";
+class Alpha extends Animation {
   constructor(mobj) {
     super({}, {}, mobj._econfig);
     this._mobj = mobj;
@@ -18,15 +17,12 @@ class Alpha extends Mobj {
   _gradient(fn) {
     return (canvas, env, done) => {
       let progress = this._getProgress(env.getDurationState());
-      let mobj = env.getMobjState("_gradient", () => {
-        return this._mobj;
-      });
+      let mobj = this._mobj;
       let fillAlphaMax = this._fillAlpha || 0;
       let strokeAlphaMax = this._strokeAlpha || 0;
       let fillAlpha = fn(0, fillAlphaMax)(progress);
       let strokeAlpha = fn(0, strokeAlphaMax)(progress);
 
-      // TODO 原始参数不应该改
       if (this._fillAlpha) {
         this._mobj._p5config.fill[3] = fillAlpha;
       }
@@ -34,9 +30,22 @@ class Alpha extends Mobj {
         this._mobj._p5config.stroke[3] = strokeAlpha;
       }
       mobj.show(canvas);
-      if (mobj._done) {
-        mobj._reset();
+
+      if (this._fillAlpha) {
+        this._mobj._p5config.fill[3] = this._fillAlpha;
       }
+      if (this._strokeAlpha) {
+        this._mobj._p5config.stroke[3] = this._strokeAlpha;
+      }
+
+      if (progress >= 1 && !mobj.done) {
+        // 等待mobj结束
+        done(false);
+        return;
+      } else if (progress >= 1 && mobj.done) {
+        return;
+      }
+      mobj._reset();
     };
   }
 
@@ -48,19 +57,19 @@ class Alpha extends Mobj {
     return this._execNode(this._default, 0).submit();
   }
 
-  fadeOut(duration) {
+  fadeOut(duration, easing = (_) => _) {
     let fn = (min, max) => {
       return (process) => {
-        return this.map(process, 1, 0, min, max);
+        return this.map(easing(process), 1, 0, min, max);
       };
     };
     return this.gradient(fn, duration);
   }
 
-  fadeIn(duration) {
+  fadeIn(duration, easing = (_) => _) {
     let fn = (min, max) => {
       return (process) => {
-        return this.map(process, 0, 1, min, max);
+        return this.map(easing(process), 0, 1, min, max);
       };
     };
     return this.gradient(fn, duration);
@@ -94,7 +103,9 @@ class Alpha extends Mobj {
   }
 
   gradient(fn, duration) {
-    this._es = this._execNode(this._gradient(fn), 0).withDuration(duration);
+    this._es = this._execNode(this._gradient(fn), 0).withDuration(
+      duration || 500
+    );
     this._submit = () => {
       return this._es.submit();
     };
