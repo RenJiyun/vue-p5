@@ -17,6 +17,10 @@ class Translation extends Transformation {
     canvas.pop();
   }
 
+  _id(canvas, env, done) {
+    done(this._mobj.show(canvas));
+  }
+
   _slide(canvas, env, done) {
     canvas.push();
     let progress = this._getProgress(env.getDurationState());
@@ -42,16 +46,24 @@ class Translation extends Transformation {
   }
 
   _submit() {
-    return this._execNode(this._default, 0).submit();
+    return this._execPlan().submit();
   }
 
-  slide(duration, easing) {
+  slide(duration, easing, parallel) {
     this._aconfig.easing = easing;
-    this._submit = () => {
-      return this._execNode(this._slide, 0)
-        .withDuration(duration || 500)
-        .submit();
-    };
+    if (parallel) {
+      this._execPlan = () => {
+        return this._execNode(this._slide, 0).withDuration(duration || 500);
+      };
+    } else {
+      this._execPlan = () => {
+        return this._sequence(
+          this._execNode(this._id, 0),
+          this._execNode(this._slide, 0).withDuration(duration || 500)
+        );
+      };
+    }
+
     return this;
   }
 

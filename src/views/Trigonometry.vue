@@ -39,8 +39,8 @@ export default {
           .stroke(255, 255, 255, 255)
           .strokeWeight(3)
           .create(500)
-          // .translate([2, 10], 5000)
-          .rotate(pi / 6, 5000)
+          // .translate_([2, 10], 1000)
+          .rotate_(pi / 4, 1000)
       );
     },
 

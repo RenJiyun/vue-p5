@@ -63,15 +63,10 @@ class ExecNode extends ExecStructure {
   }
 
   _call(that, canvas) {
-    this._fn.bind(that)(
-      canvas,
-      this,
-      ((_) => {
-        // 执行节点和Mobj的状态均应该设置成指定的值
-        this._done = _;
-        that._done = _;
-      }).bind(this)
-    );
+    this._fn.bind(that)(canvas, this, (_) => {
+      // TODO 执行节点和Mobj的状态均应该设置成指定的值，忘记为什么需要将that设置成true了，这里有bug
+      this._done = _;
+    });
   }
 
   withDuration(duration) {

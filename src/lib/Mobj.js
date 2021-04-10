@@ -19,21 +19,39 @@ class Mobj extends SceneObj {
     return this;
   }
 
-  translate(dv, duration, easing) {
+  _translate(dv, duration, easing, parallel) {
     if (dv instanceof Array) {
       dv = complex(...dv);
     }
-    return new Translation(dv, this, this._econfig).slide(duration, easing);
+    return new Translation(dv, this, this._econfig).slide(
+      duration,
+      easing,
+      parallel
+    );
   }
 
-  translation_(dv, duration, easing) {
-    if (dv instanceof Array) {
-      dv = complex(...dv);
-    }
+  translate() {
+    return this._translate(...arguments, true);
+  }
+
+  translate_() {
+    return this._translate(...arguments, false);
+  }
+
+  _rotate(theta, duration, easing, parallel) {
+    return new Rotation(theta, this, this._econfig).rotate(
+      duration,
+      easing,
+      parallel
+    );
   }
 
   rotate(theta, duration, easing) {
-    return new Rotation(theta, this, this._econfig).rotate(duration, easing);
+    return this._rotate(theta, duration, easing, true);
+  }
+
+  rotate_(theta, duration, easing) {
+    return this._rotate(theta, duration, easing, false);
   }
 
   fadeOut(duration, easing) {
@@ -50,4 +68,5 @@ class Mobj extends SceneObj {
     }
   }
 }
+
 export default Mobj;
