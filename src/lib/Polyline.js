@@ -53,17 +53,19 @@ class Polyline extends Mobj {
   }
 
   _submit() {
-    return this._execNode(this._default, 0).submit();
+    return this._execPlan().submit();
   }
 
   _create(duration, easing) {
     this._aconfig.easing = easing;
-    this._submit = () => {
-      return this._execNode(this._create_0, 0)
-        .withDuration(duration || 500)
-        .submit();
+    this._execPlan = () => {
+      return this._execNode(this._create_0, 0).withDuration(duration || 500);
     };
     return this;
+  }
+
+  _execPlan() {
+    return this._execNode(this._default, 0);
   }
 }
 

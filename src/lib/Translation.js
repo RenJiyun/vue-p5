@@ -54,6 +54,10 @@ class Translation extends Transformation {
     };
     return this;
   }
+
+  _execPlan() {
+    return this._execNode(this._default, 0);
+  }
 }
 
 export default Translation;

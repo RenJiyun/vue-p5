@@ -157,7 +157,7 @@ class SceneObj {
     } else {
       canvas.stroke(...this._p5config.stroke);
     }
-    
+
     canvas.strokeWeight(this._p5config.strokeWeight || 1);
 
     canvas.strokeJoin(canvas.ROUND);
@@ -228,6 +228,10 @@ class SceneObj {
   _reset() {
     this._done = false;
     this._execGraph((es) => (es._done = false));
+  }
+
+  _submit() {
+    return this._execPlan().submit();
   }
 
   show(canvas) {

@@ -26,6 +26,12 @@ class Mobj extends SceneObj {
     return new Translation(dv, this, this._econfig).slide(duration, easing);
   }
 
+  translation_(dv, duration, easing) {
+    if (dv instanceof Array) {
+      dv = complex(...dv);
+    }
+  }
+
   rotate(theta, duration, easing) {
     return new Rotation(theta, this, this._econfig).rotate(duration, easing);
   }
