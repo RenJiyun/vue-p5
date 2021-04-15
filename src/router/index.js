@@ -39,6 +39,12 @@ const routes = [
     name: "generate_art_partical",
     component: () => import("../views/generate_art/Partical"),
   },
+
+  {
+    path: "/ptolemy_theorem",
+    name: "ptolemy_theorem",
+    component: () => import("../views/PtolemyTheorem"),
+  },
 ];
 
 const router = new VueRouter({

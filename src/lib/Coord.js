@@ -43,6 +43,14 @@ class Coord extends Mobj {
     return this._xMax;
   }
 
+  toSceneCoord() {
+    let [x, y] = arguments[0];
+    return $math.complex(
+      (x - this._ox) / this._xInterval,
+      (this._oy - y) / this._yInterval
+    );
+  }
+
   toNativeCoord() {
     if (arguments.length == 1) {
       let c = arguments[0];
@@ -68,8 +76,8 @@ class Coord extends Mobj {
     let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((_) => _);
 
-    canvas.stroke(255);
-    canvas.fill(255);
+    canvas.stroke(37);
+    canvas.fill(37);
     let hl = this._width / 2;
     let l = canvas.map(easing(progress), 0, 1, 0, hl);
     canvas.line(this._ox - l, this._oy, this._ox + l, this._oy);
@@ -79,8 +87,8 @@ class Coord extends Mobj {
   _create_1(canvas, env, done) {
     let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((_) => _);
-    canvas.stroke(255);
-    canvas.fill(255);
+    canvas.stroke(37);
+    canvas.fill(37);
     let hl = this._height / 2;
     let l = canvas.map(easing(progress), 0, 1, 0, hl);
     canvas.line(this._ox, this._oy - l, this._ox, this._oy + l);
@@ -90,8 +98,8 @@ class Coord extends Mobj {
   _create_2(canvas, env, done) {
     let progress = this._getProgress(env.getDurationState());
     let easing = this._aconfig.easing || ((_) => _);
-    canvas.stroke(255, 100);
-    canvas.fill(255);
+    canvas.stroke(37, 100);
+    canvas.fill(37);
     let hw = (this._width / 2) * easing(progress);
     let hh = (this._height / 2) * easing(progress);
     for (let x = 0, i = 0; x <= hw; x += this._xInterval, i++) {
@@ -137,8 +145,8 @@ class Coord extends Mobj {
       return;
     }
 
-    canvas.stroke(255);
-    canvas.fill(255);
+    canvas.stroke(37);
+    canvas.fill(37);
 
     // x-axis
     canvas.line(
@@ -155,7 +163,7 @@ class Coord extends Mobj {
       this._oy + this._height / 2
     );
 
-    canvas.stroke(255, 100);
+    canvas.stroke(37, 100);
     for (let x = 0, i = 0; x <= this._width / 2; x += this._xInterval, i++) {
       if (this._grid) {
         canvas.line(

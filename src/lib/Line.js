@@ -2,13 +2,13 @@ import Mobj from "./Mobj";
 const $math = require("mathjs");
 
 class Line extends Mobj {
-  constructor(c0, c1, ..._) {
-    super(..._);
+  constructor(c0, c1, econfig) {
+    super({}, {}, econfig);
     this._c0 = c0;
     this._c1 = c1;
   }
 
-  draw(canvas, env) {
+  _create_0(canvas, env) {
     let { c0, c1 } = [this._c0, this._c1];
     let easing = this._aconfig.easing || ((x) => x);
     this._configCanvas(canvas);
@@ -32,6 +32,10 @@ class Line extends Mobj {
       .withDuration(this._aconfig.duration)
       .submit();
   }
+
+  _create() {}
+
+  _execPlan() {}
 }
 
 export default Line;

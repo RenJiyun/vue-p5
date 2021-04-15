@@ -138,7 +138,7 @@ class SceneObj {
 
   _configCanvas(canvas) {
     if (this._p5config.fill == undefined) {
-      canvas.fill(255);
+      canvas.fill(37);
     } else if (this._p5config.fill == false) {
       canvas.noFill();
     } else {
@@ -146,7 +146,7 @@ class SceneObj {
     }
 
     if (this._p5config.stroke == undefined) {
-      canvas.stroke(255);
+      canvas.stroke(37);
     } else if (this._p5config.stroke == false) {
       canvas.noStroke();
     } else {
@@ -183,6 +183,10 @@ class SceneObj {
 
   /************************************************ math hepler function *************************************************************/
 
+  toSceneCoord() {
+    return this._coord.toSceneCoord(...arguments);
+  }
+
   toNativeCoord() {
     return this._coord.toNativeCoord(...arguments);
   }
@@ -203,7 +207,49 @@ class SceneObj {
     return this._p5.map(v, vmin, vmax, mmin, mmax);
   }
 
-  /*************************************************************************************************************/
+  /************************************************ math hepler function *************************************************************/
+
+  /************************************************ p5 hepler function *************************************************************/
+
+  stroke(c) {
+    this._p5config.stroke = c;
+    return this;
+  }
+
+  strokeWeight(w) {
+    if (w) {
+      this._p5config.strokeWeight = w;
+      return this;
+    } else {
+      return this._p5config.strokeWeight
+    }
+    
+  }
+
+
+
+  fill(c) {
+    this._p5config.fill = c;
+    return this;
+  }
+
+  /************************************************ p5 hepler function *************************************************************/
+
+  /************************************************ event hepler function *************************************************************/
+
+  // mouseClicked(e) {}
+
+  // mouseWheel(e) {}
+
+  // mousePressed(e) {}
+
+  // mouseReleased(e) {}
+
+  // keyPressed(e) {}
+
+  // keyReleased(e) {}
+
+  /************************************************ event hepler function *************************************************************/
 
   _init() {
     // 生成所需的图层
@@ -223,6 +269,7 @@ class SceneObj {
   _reset() {
     this._done = false;
     this._execGraph((es) => (es._done = false));
+    return this;
   }
 
   _submit() {

@@ -4,6 +4,7 @@ class Transformation extends SceneObj {
   constructor() {
     super(...arguments);
   }
+
 }
 
 export default Transformation;

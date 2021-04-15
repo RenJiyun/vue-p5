@@ -4,6 +4,7 @@
     <router-link to="/inversion">反演</router-link> |
     <router-link to="/generate_art/wave">波浪</router-link> |
     <router-link to="/generate_art/partical">粒子</router-link> |
+    <router-link to="/ptolemy_theorem">托勒密定理</router-link> |
   </div>
 </template>
 

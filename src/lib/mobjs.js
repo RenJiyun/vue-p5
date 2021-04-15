@@ -2,6 +2,9 @@ import { complex } from "mathjs";
 import Function from "./Function";
 import Circle from "./Circle";
 import Polyline from "./Polyline";
+import Line from "./Line";
+import Segment from "./Segment";
+import Inversion from "./Inversion";
 
 let _p5;
 let _coord;
@@ -74,6 +77,16 @@ function triangle(vertexes) {
 
 function line() {}
 
+function segment(P0, P1) {
+  if (P0 instanceof Array) {
+    P0 = complex(...P0);
+    P1 = complex(...P1);
+  }
+  return new Segment(P0, P1, _econfig)
+    .stroke([50, 50, 50, 255])
+    .strokeWeight(2);
+}
+
 function ellipse() {}
 
 function angle() {}
@@ -86,6 +99,10 @@ function vf() {}
 
 function arc() {}
 
+function inversion(circle, mobj) {
+  return new Inversion(circle._O, circle._r, mobj, _econfig);
+}
+
 export {
   init,
   f,
@@ -95,10 +112,12 @@ export {
   square,
   triangle,
   line,
+  segment,
   ellipse,
   angle,
   parallel,
   v,
   vf,
   arc,
+  inversion
 };

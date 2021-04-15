@@ -9,16 +9,6 @@ class Mobj extends SceneObj {
     super(...arguments);
   }
 
-  stroke() {
-    this._p5config.stroke = arguments;
-    return this;
-  }
-
-  strokeWeight() {
-    this._p5config.strokeWeight = arguments[0];
-    return this;
-  }
-
   _translate(dv, duration, easing, parallel) {
     if (dv instanceof Array) {
       dv = complex(...dv);
@@ -67,6 +57,11 @@ class Mobj extends SceneObj {
       return this._create(duration, easing);
     }
   }
+
+  lerp(mobj, duration, easing) {
+    
+  }
+
 }
 
 export default Mobj;
