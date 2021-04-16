@@ -6,6 +6,7 @@
 import * as p5 from "p5";
 import Coord from "@/lib/Coord";
 import Scene from "@/lib/Scene";
+const $mode = require("@/lib/Mode");
 const $m = require("@/lib/mobjs");
 import { pi, complex, Complex } from "mathjs";
 
@@ -31,14 +32,8 @@ export default {
     setup(p5) {
       this.init(p5);
       let se = this.scene;
-      let segment = $m.segment([0, 0], [8, 9]);
-      se.add(segment);
-
-      let circle = $m.circle([-9, 0], 6);
-      se.add(circle);
-
-      let inversion = $m.inversion(circle, segment);
-      se.add(inversion);
+      let mode = $mode.M_CREATE;
+      se.add(mode)
     },
 
     draw(p5) {
@@ -64,7 +59,7 @@ export default {
         grid: false,
         label: true,
         labelInterval: 3,
-        display: false,
+        display: true,
       };
 
       let coord = new Coord(
@@ -78,6 +73,7 @@ export default {
 
       this.scene.add(coord);
       $m.init(p5, coord);
+      $mode.init(p5, coord);
     },
   },
 };

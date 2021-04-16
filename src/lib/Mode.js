@@ -1,17 +1,50 @@
 import SceneObj from "./SceneObj";
 
-class Mode extends SceneObj {
-  constructor() {
-    super({}, {}, {});
+let _p5;
+let _coord;
+let _econfig;
 
-    this._done = true;
+function init(p5, coord) {
+  _p5 = p5;
+  _coord = coord;
+
+  if (_p5 == undefined) {
+    throw Error("p5 is undefined");
   }
 
-  keyPressed(e) {
+  if (_coord == undefined) {
+    throw Error("coord is undefined");
+  }
+
+  _econfig = {
+    p5: _p5,
+    coord: _coord,
+  };
+}
+
+
+class Mode {
+  keyPressed(e, scene) {
+    if (e.key == "c" && this._creatingId == undefined) {
+      scene.refresh();
+    }
+  }
+
+  mouseClicked(e, scene) {}
+
+  publishMobj(mobj, scene) {
+    scene.add(mobj);
+    scene.remove(this._creatingId);
+    scene.refresh();
   }
 }
 
-export default Mode;
+function mode() {
+  return new Mode();
+}
+
+let M_CREATE = new Mode();
+export { init, M_CREATE };
 
 /**
  * alt作为模式选择的先导键
@@ -37,15 +70,4 @@ export default Mode;
  * 12. 对称变换 re
  * 13. 反演变换 in
  */
-//    keyPressed(e) {
-//     mode("c")
-//       .create("p").wait(mouseClicked, 1).done()
-//       .create("l").wait(mouseClicked, 1).done()
-//       .create("c").wait(mouseClicked, 2).done()
-//       .create("t").wait(mouseClicked, 3).done()
-//       .create("r").wait(mouseClicked, 2).done()
-//       .create("sq").wait(mouseClicked, 2).done()
-//       .create("po").wait("自定义事件").done()
-//     .done()
-//     .mode("m")
-//   }
+

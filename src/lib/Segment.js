@@ -1,26 +1,14 @@
+import { abs, distance } from "mathjs";
 import Mobj from "./Mobj";
-import { abs, complex, Complex, distance, max, min, multiply } from "mathjs";
 
-class Segment extends Mobj {
-  constructor(P0, P1, econfig) {
-    super({}, {}, econfig);
-
+class D_Segment extends Segment {
+  constructor(P0, P1) {
+    super(...arguments);
     this._P0 = P0;
     this._P1 = P1;
-
-    this._check();
   }
 
-  _check() {
-    this._length = distance(this._P0.toVector(), this._P1.toVector());
-    if (this._length <= 0) {
-      throw new Error("the segment's length equals to 0");
-    }
-  }
-
-  _create_0(canvas, env) {}
-
-  _default(canvas, env, done) {
+  _draw_0(canvas, env, done) {
     this._configCanvas(canvas);
     canvas.line(
       ...this.toNativeCoord(this._P0),
@@ -31,11 +19,6 @@ class Segment extends Mobj {
 
   get _layerNum() {
     return 1;
-  }
-
-  _create(duration, easing) {
-    this._aconfig.easing = easing;
-    return this._execNode(this._create_0, 0).withDuration(duration || 500);
   }
 
   _execPlan() {
@@ -95,14 +78,15 @@ class Segment extends Mobj {
       scene.refresh();
     }
   }
+}
 
-  sampling() {
-    let ret = [];
-    let [p0, p1] = [this._P0, this._P1];
-    for (let t = 0; t <= 1; t += 0.01) {
-      ret.push(multiply(p0, t).add(multiply(p1, 1 - t)));
-    }
-    return ret;
+class A_Segment extends Segment {}
+
+class C_Segment extends Segment {}
+
+class Segment extends Mobj {
+  constructor(econfig) {
+    super({}, {}, econfig);
   }
 }
 

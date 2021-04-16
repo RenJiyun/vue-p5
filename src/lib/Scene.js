@@ -1,7 +1,5 @@
-import Mode from "./Mode";
 import SceneObj from "./SceneObj";
 import Transformation from "./Transformation";
-
 
 const EVENTS = [
   "mouseClicked",
@@ -52,8 +50,6 @@ class Scene {
         }
       };
     });
-
-    this.add(new Mode());
   }
 
   get width() {
@@ -125,7 +121,7 @@ class Scene {
       }
     });
 
-    return this;
+    return this._objects.length - 1;
   }
 
   push(obj) {
@@ -137,6 +133,11 @@ class Scene {
     this._layers.pop();
   }
 
+  remove(id) {
+    this._objects.splice(id, 1);
+    this._layers.splice(id, 1);
+  }
+
   registerEvent(eventName, cb) {
     if (this._registeredEvents[eventName] == undefined) {
       this._registeredEvents[eventName] = [];
@@ -144,6 +145,8 @@ class Scene {
 
     this._registeredEvents[eventName].push(cb);
   }
+
+  
 }
 
 export default Scene;
