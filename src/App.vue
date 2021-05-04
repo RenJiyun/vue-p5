@@ -1,8 +1,7 @@
 <template>
   <div id="app">
-    <div id="nav">
-    </div>
-    <router-view/>
+    <div id="nav"></div>
+    <router-view />
   </div>
 </template>
 
@@ -15,9 +14,6 @@
   color: #2c3e50;
 }
 
-#nav {
-}
-
 #nav a {
   font-weight: bold;
   color: #2c3e50;
@@ -25,5 +21,10 @@
 
 #nav a.router-link-exact-active {
   color: #42b983;
+}
+
+* {
+  padding: 0px;
+  margin: 0px;
 }
 </style>

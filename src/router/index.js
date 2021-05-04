@@ -45,6 +45,18 @@ const routes = [
     name: "ptolemy_theorem",
     component: () => import("../views/PtolemyTheorem"),
   },
+
+  {
+    path: "/stage",
+    name: "stage",
+    component: () => import("../views/Stage"),
+  },
+
+  {
+    path: "/pixi_demo",
+    name: "pixi_demo",
+    component: () => import("../views/PixiDemo"),
+  },
 ];
 
 const router = new VueRouter({

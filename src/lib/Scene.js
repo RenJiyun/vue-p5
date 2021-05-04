@@ -1,152 +1,97 @@
-import SceneObj from "./SceneObj";
-import Transformation from "./Transformation";
+import * as mm from "./mode_manager";
+import constants from "./constants";
 
-const EVENTS = [
-  "mouseClicked",
-  "mouseWheel",
-  "mousePressed",
-  "mouseReleased",
-  "mouseMoved",
-  "mouseDragged",
-  "keyPressed",
-  "keyReleased",
-];
 class Scene {
-  constructor(config) {
-    let { p5, width, height } = config;
-    this._p5 = p5;
-    this._width = width;
-    this._height = height;
+  constructor(sid, canvas, x, y, w, h) {
+    this._sid = sid;
+    this._canvas = canvas;
+    this._x = x;
+    this._y = y;
+    this._w = w;
+    this._h = h;
 
-    this._p5.createCanvas(this._width, this._height);
+    // 指示场景是否被选中
+    this._selected = false;
 
-    this._objects = [];
-    this._layers = [];
+    // 指示场景是否隐藏
+    this._hidden = false;
+  }
 
-    this._done = false;
+  get sid() {
+    return this._sid;
+  }
 
-    this._registeredEvents = {};
+  get canvas() {
+    return this._canvas;
+  }
 
-    EVENTS.forEach((e) => {
-      this._p5[e] = (event) => {
-        // 分发至注册好的对象
-        (this._registeredEvents[e] || []).forEach((element) => {
-          if (event.layerX != undefined && event.layerY != undefined) {
-            event.sceneX = event.layerX - this._width / 2;
-            event.sceneY = event.layerY - this._height / 2;
-          }
-          if (typeof element == "function") {
-            element(event, this);
-          } else if (element instanceof SceneObj) {
-            element[e](event, this);
-          } else {
-            throw new Error("unsuppported event callback");
-          }
-        });
+  get x() {
+    return this._x;
+  }
 
-        // 分发至本对象
-        if (this[e] != undefined && typeof this[e] == "function") {
-          this[e](event);
-        }
-      };
-    });
+  get y() {
+    return this._y;
   }
 
   get width() {
-    return this._width;
+    return this._w;
   }
 
   get height() {
-    return this._height;
+    return this._h;
+  }
+
+  get selected() {
+    return this._selected;
+  }
+
+  get hidden() {
+    return this._hidden;
+  }
+
+  copy(sid, canvas) {}
+
+  select() {
+    this._selected = true;
+  }
+
+  unselect() {
+    this._selected = false;
+  }
+
+  hide() {
+    this._hidden = true;
   }
 
   show() {
-    function updateLayers() {
-      this._done = true;
-      for (let index = 0; index < this._objects.length; index++) {
-        let obj = this._objects[index];
-        let layer = this._layers[index];
-        if (!obj.done) {
-          this._done = false;
-          layer.clear();
-          obj.show(layer);
-        }
-      }
-    }
-
-    function showLayers() {
-      for (let layer of this._layers) {
-        this._p5.image(
-          layer,
-          -this._width / 2,
-          -this._height / 2,
-          this._width,
-          this._height
-        );
-      }
-    }
-
-    this._p5.background(245, 245, 245);
-    this._p5.translate(this._width / 2, this._height / 2);
-    updateLayers.bind(this)();
-    showLayers.bind(this)();
-    if (this._done) {
-      console.log("all layers done!");
-      this._p5.noLoop();
-    }
+    this._hidden = false;
   }
 
-  refresh() {
-    this._objects.forEach((obj) => {
-      if (obj instanceof Transformation) {
-        obj._reset();
-      }
-    });
-
-    // TODO 这种处理方式应该是有问题的，暂时这样
-    this._done = false;
-    this._p5.loop();
+  scale(dw, dh) {
+    this._x += dw / 2;
+    this._y += dh / 2;
+    this._w += dw;
+    this._h += dh;
   }
 
-  add(obj) {
-    this._objects.push(obj);
-    let layer = this._p5.createGraphics(this._width, this._height);
-    layer.background(0, 0, 0, 0);
-    layer.translate(this._width / 2, this._height / 2);
-    this._layers.push(layer);
-
-    EVENTS.forEach((e) => {
-      if (obj[e] != undefined && typeof obj[e] == "function") {
-        this.registerEvent(e, obj);
-      }
-    });
-
-    return this._objects.length - 1;
+  move(v) {
+    this._x += v[0];
+    this._y += v[1];
   }
 
-  push(obj) {
-    this.add(obj);
+  draw() {
+    let canvas = this._canvas;
+
+    // 做一些重置工作
+    canvas.clear();
+    canvas.rectMode(canvas.CENTER);
+    // 对于p5.Graphics对象需要重置变换矩阵，否则变换会被累积
+    canvas.resetMatrix();
+    canvas.translate(this._w / 2, this._h / 2);
+
+    // TODO 需要设置一些图层相关的配置项
+    canvas.background(constants.DEFAULT_BACKGROUND);
   }
-
-  pop() {
-    this._objects.pop();
-    this._layers.pop();
-  }
-
-  remove(id) {
-    this._objects.splice(id, 1);
-    this._layers.splice(id, 1);
-  }
-
-  registerEvent(eventName, cb) {
-    if (this._registeredEvents[eventName] == undefined) {
-      this._registeredEvents[eventName] = [];
-    }
-
-    this._registeredEvents[eventName].push(cb);
-  }
-
-  
 }
 
 export default Scene;
